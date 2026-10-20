@@ -1,4 +1,10 @@
-import { LIMITS, pruneSegments, type QuestionState, type Segment } from '@noclue/shared';
+import {
+  LIMITS,
+  pruneSegments,
+  type MeetingLanguage,
+  type QuestionState,
+  type Segment,
+} from '@noclue/shared';
 
 export const normalizeQuestion = (text: string) =>
   text
@@ -6,11 +12,172 @@ export const normalizeQuestion = (text: string) =>
     .replace(/[^\p{L}\p{N}']/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-// Fast provisional filter only. The generator supplies the semantic completeness
-// verdict; neither punctuation nor ASR finalization alone authorizes publication.
-export function inspectQuestion(text: string) {
-  const normalized = normalizeQuestion(text);
-  const words = normalized.split(' ').filter(Boolean);
+/**
+ * Question cues for the non-English meeting languages: interrogative words, request verbs
+ * and auxiliaries that open a yes/no question. Matched on normalized (lowercase) text with
+ * Unicode-aware word boundaries, because \b does not treat letters like č or ü as word characters.
+ */
+const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: string[] }> = {
+  sk: {
+    anywhere: [
+      'čo',
+      'prečo',
+      'ako',
+      'kto',
+      'kedy',
+      'kde',
+      'ktorý',
+      'ktorá',
+      'ktoré',
+      'ktorí',
+      'koľko',
+      'aký',
+      'aká',
+      'aké',
+      'akí',
+      'vysvetlite',
+      'vysvetli',
+      'popíšte',
+      'popíš',
+      'povedzte',
+      'povedz',
+      'predstavte',
+    ],
+    opening: [
+      'môžete',
+      'môžeš',
+      'mohli',
+      'viete',
+      'vieš',
+      'je',
+      'sú',
+      'máte',
+      'máš',
+      'bude',
+      'budú',
+      'boli',
+      'bol',
+      'bola',
+      'plánujete',
+      'chcete',
+      'myslíte',
+      'dá',
+      'existuje',
+      'či',
+    ],
+  },
+  cs: {
+    anywhere: [
+      'co',
+      'proč',
+      'jak',
+      'kdo',
+      'kdy',
+      'kde',
+      'který',
+      'která',
+      'které',
+      'kteří',
+      'kolik',
+      'jaký',
+      'jaká',
+      'jaké',
+      'jací',
+      'vysvětlete',
+      'vysvětli',
+      'popište',
+      'popiš',
+      'řekněte',
+      'řekni',
+      'představte',
+    ],
+    opening: [
+      'můžete',
+      'můžeš',
+      'mohli',
+      'víte',
+      'víš',
+      'je',
+      'jsou',
+      'máte',
+      'máš',
+      'bude',
+      'budou',
+      'byli',
+      'byl',
+      'byla',
+      'plánujete',
+      'chcete',
+      'myslíte',
+      'dá',
+      'existuje',
+      'zda',
+      'jestli',
+    ],
+  },
+  de: {
+    anywhere: [
+      'was',
+      'warum',
+      'wieso',
+      'weshalb',
+      'wie',
+      'wer',
+      'wen',
+      'wem',
+      'wann',
+      'wo',
+      'woher',
+      'wohin',
+      'welche',
+      'welcher',
+      'welches',
+      'welchen',
+      'erklären',
+      'erkläre',
+      'beschreiben',
+      'beschreibe',
+      'erzählen',
+      'erzähle',
+    ],
+    opening: [
+      'können',
+      'kannst',
+      'könnten',
+      'könntest',
+      'würden',
+      'würdest',
+      'werden',
+      'wird',
+      'haben',
+      'hast',
+      'hat',
+      'ist',
+      'sind',
+      'gibt',
+      'gab',
+      'sollten',
+      'sollen',
+      'darf',
+      'dürfen',
+      'planen',
+      'wollen',
+      'ob',
+    ],
+  },
+};
+const FILLERS: Record<'sk' | 'cs' | 'de', string[]> = {
+  sk: ['tak', 'a', 'no', 'dobre', 'okej', 'vlastne'],
+  cs: ['tak', 'a', 'no', 'dobře', 'okej', 'vlastně'],
+  de: ['also', 'und', 'okay', 'gut', 'eigentlich', 'na'],
+};
+function cueCandidate(words: string[], language: 'sk' | 'cs' | 'de') {
+  const cues = QUESTION_CUES[language];
+  if (words.some((w) => cues.anywhere.includes(w))) return true;
+  const first = FILLERS[language].includes(words[0]) ? words[1] : words[0];
+  return !!first && cues.opening.includes(first);
+}
+function englishInspection(normalized: string) {
   const strandedPreposition = /\b(what|which|who)\b.+\b(for|to|with|about|of)$/.test(normalized);
   const incomplete =
     !strandedPreposition &&
@@ -25,14 +192,31 @@ export function inspectQuestion(text: string) {
     ) ||
     /^(?:in|for|with|regarding|given|at|on)\b.{0,180}\b(?:can|could|would|will|should|do|does|did|is|are|have|has)\s+(?:the|this|that|your|our|it|you|we|they|a|an)\b/i.test(
       normalized,
-    ) ||
-    text.includes('?');
+    );
+  return { candidate, incomplete };
+}
+// Fast provisional filter only. The generator supplies the semantic completeness
+// verdict; neither punctuation nor ASR finalization alone authorizes publication.
+// The English unfinished-clause check has no counterpart in the other languages, so there
+// the generator's questionComplete verdict alone decides whether a question is finished.
+export function inspectQuestion(text: string, language: MeetingLanguage = 'en') {
+  const normalized = normalizeQuestion(text);
+  const words = normalized.split(' ').filter(Boolean);
+  const english =
+    language === 'en' || language === 'auto' ? englishInspection(normalized) : undefined;
+  const others =
+    language === 'auto' ? (['sk', 'cs', 'de'] as const) : language === 'en' ? [] : [language];
+  const candidate =
+    !!english?.candidate || others.some((l) => cueCandidate(words, l)) || text.includes('?');
+  // In automatic mode the English check applies only when the text reads as English.
+  const incomplete = !!english?.incomplete && (language === 'en' || english.candidate);
   return {
     candidate: candidate && words.length >= 2,
     complete: candidate && !incomplete && words.length >= 2,
   };
 }
 export class QuestionEngine {
+  constructor(private language: MeetingLanguage = 'en') {}
   current?: QuestionState;
   private parts = new Map<string, Segment>();
   private consumed = new Set<string>();
@@ -58,8 +242,8 @@ export class QuestionEngine {
         this.current &&
         this.finalized &&
         !this.speaking &&
-        inspectQuestion(this.current.text).complete &&
-        inspectQuestion(segment.text).candidate;
+        inspectQuestion(this.current.text, this.language).complete &&
+        inspectQuestion(segment.text, this.language).candidate;
       if ((newQuestion || (this.awaitingNewTurn && !known)) && !this.ended) this.consume();
       if (this.ended) {
         this.parts.clear();
@@ -106,7 +290,7 @@ export class QuestionEngine {
         this.finalized &&
         (this.ended ||
           (!this.awaitingContinuation &&
-            inspectQuestion(this.current.text).complete &&
+            inspectQuestion(this.current.text, this.language).complete &&
             pause >= LIMITS.continuationMs))
       )
         this.awaitingNewTurn = true;
@@ -129,7 +313,7 @@ export class QuestionEngine {
   get mayComplete() {
     if (!this.current || this.ended || this.awaitingNewTurn || !this.finalized || this.speaking)
       return false;
-    const { complete, candidate } = inspectQuestion(this.current.text);
+    const { complete, candidate } = inspectQuestion(this.current.text, this.language);
     return complete || (candidate && this.settleIn() === 0);
   }
   /**

@@ -1,5 +1,11 @@
 import React from 'react';
-import { defaultPreferences, type Project } from '@noclue/shared';
+import {
+  MEETING_LANGUAGES,
+  MEETING_LANGUAGE_LABELS,
+  defaultPreferences,
+  type MeetingLanguage,
+  type Project,
+} from '@noclue/shared';
 export function ResponseControls({
   project,
   onChange,
@@ -12,6 +18,24 @@ export function ResponseControls({
   return (
     <fieldset className="response-controls">
       <legend>Response preferences</legend>
+      <label>
+        Meeting language
+        <select
+          aria-label="Meeting language"
+          value={value.language ?? 'en'}
+          onChange={(e) => update({ language: e.target.value as MeetingLanguage })}
+        >
+          {MEETING_LANGUAGES.map((language) => (
+            <option key={language} value={language}>
+              {MEETING_LANGUAGE_LABELS[language]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <p className="privacy">
+        noclue transcribes this language and prepares answers in it. Automatic answers in the
+        language of each question. Coaching and the interface stay in English.
+      </p>
       <label>
         Response style
         <select

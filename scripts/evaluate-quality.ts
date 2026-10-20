@@ -76,7 +76,8 @@ for (const scenario of fixture.scenarios) {
       modelLatencyMs: Date.now() - started,
       humanReview: {
         useful: null,
-        english: null,
+        /** Spoken in the scenario's meeting language, natural and correct. */
+        languageCorrect: null,
         grounded: null,
         claimStatusAccurate: null,
         speakability: null,

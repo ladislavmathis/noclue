@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 /** Single app version shown in the UI. Must equal root package.json and the extension manifest (enforced by tests/version.test.ts). */
-export const APP_VERSION = '0.4.0';
+export const APP_VERSION = '0.5.0';
 export const PROTOCOL_VERSION = 5;
-export const PROMPT_VERSION = 'quick-b2-v04.7-reliable';
+export const PROMPT_VERSION = 'quick-b2-v05.0-languages';
 export const ClaimStatusSchema = z.enum([
   'PROPOSED',
   'PLANNED',
@@ -105,6 +105,8 @@ export const ProjectSchema = z
         strictContext: z.boolean(),
         silenceMs: z.number().int().min(300).max(2000),
         previewUnverified: z.boolean().optional(),
+        /** Language spoken in the meeting; answers are prepared in it. */
+        language: z.enum(['en', 'sk', 'cs', 'de', 'auto']).optional(),
       })
       .strict()
       .optional(),
@@ -117,7 +119,26 @@ export const defaultPreferences = {
   strictContext: false,
   silenceMs: 700,
   previewUnverified: true,
+  language: 'en',
 } as const;
+/** Meeting languages noclue transcribes and answers in. 'auto' answers in the question's language. */
+export const MEETING_LANGUAGES = ['en', 'sk', 'cs', 'de', 'auto'] as const;
+export type MeetingLanguage = (typeof MEETING_LANGUAGES)[number];
+export type SpokenLanguage = Exclude<MeetingLanguage, 'auto'>;
+export const SPOKEN_LANGUAGES: readonly SpokenLanguage[] = ['en', 'sk', 'cs', 'de'];
+export const MEETING_LANGUAGE_LABELS: Record<MeetingLanguage, string> = {
+  en: 'English',
+  sk: 'Slovak',
+  cs: 'Czech',
+  de: 'German',
+  auto: 'Automatic (same as the question)',
+};
+/** The meeting language of a project, defaulting to English for settings saved before 0.5. */
+export const meetingLanguage = (project: Pick<Project, 'preferences'>): MeetingLanguage =>
+  project.preferences?.language ?? 'en';
+/** English name of a fixed meeting language, or null for automatic detection. */
+export const languageName = (language: MeetingLanguage): string | null =>
+  language === 'auto' ? null : MEETING_LANGUAGE_LABELS[language];
 /**
  * Bring-your-own-key AI configuration. Transcription always uses OpenAI (no other provider
  * offers comparable realtime speech-to-text); answers and the fact check use the chosen

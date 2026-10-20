@@ -7,5 +7,48 @@
     "context": "The pilot starts in May.\n\nThe budget is not approved yet.\n\nThe team has two developers and one designer.",
     "keywords": []
   },
-  "scenarios": []
+  "scenarios": [
+    {
+      "id": "sk-pilot-start",
+      "utterance": "Kedy začína pilot a máte už nejaký rozpočet?",
+      "project": {
+        "preferences": {
+          "tone": "professional",
+          "length": "standard",
+          "strictContext": false,
+          "silenceMs": 700,
+          "language": "sk"
+        }
+      },
+      "expect": "Slovak answer: the pilot starts in May; the budget is not approved yet."
+    },
+    {
+      "id": "de-team-size",
+      "utterance": "Wie groß ist das Team, das am Projekt arbeitet?",
+      "project": {
+        "preferences": {
+          "tone": "professional",
+          "length": "standard",
+          "strictContext": false,
+          "silenceMs": 700,
+          "language": "de"
+        }
+      },
+      "expect": "German answer: two developers and one designer."
+    },
+    {
+      "id": "auto-cs-budget",
+      "utterance": "Je už schválený rozpočet?",
+      "project": {
+        "preferences": {
+          "tone": "professional",
+          "length": "standard",
+          "strictContext": false,
+          "silenceMs": 700,
+          "language": "auto"
+        }
+      },
+      "expect": "Czech answer, because the question is Czech: the budget is not approved yet."
+    }
+  ]
 }

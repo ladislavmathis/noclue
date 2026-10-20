@@ -1,0 +1,241 @@
+import { describe, it, expect } from 'vitest';
+import { inspectQuestion, QuestionEngine } from '../packages/core/src/questions/engine';
+import { transcriptionLanguages } from '../packages/core/src/realtime/transcriber';
+import {
+  SYSTEM_PROMPT,
+  languageInstruction,
+  systemPrompt,
+} from '../packages/core/src/recommendations/provider';
+import { PHRASES, phrasesFor } from '../packages/core/src/recommendations/phrases';
+import {
+  claimProblem,
+  englishWording,
+  fallback,
+  isSafeTemplate,
+  qualifyProposal,
+} from '../packages/core/src/recommendations/quick';
+import {
+  ProjectSchema,
+  SPOKEN_LANGUAGES,
+  factsForProject,
+  meetingLanguage,
+  type Decision,
+  type MeetingLanguage,
+} from '../packages/shared/src/index';
+
+const examples: Record<'sk' | 'cs' | 'de', { question: string; yesNo: string; statement: string }> =
+  {
+    sk: {
+      question: 'Kedy začína pilotný projekt',
+      yesNo: 'Môžete nám poslať cenovú ponuku',
+      statement: 'Pilot začneme v marci s dvoma tímami',
+    },
+    cs: {
+      question: 'Kolik bude stát pilotní projekt',
+      yesNo: 'Můžete nám poslat cenovou nabídku',
+      statement: 'Pilot začneme v březnu se dvěma týmy',
+    },
+    de: {
+      question: 'Wann beginnt das Pilotprojekt',
+      yesNo: 'Können Sie uns ein Angebot schicken',
+      statement: 'Wir starten den Piloten im März mit zwei Teams',
+    },
+  };
+
+describe('meeting language setting', () => {
+  it('defaults to English for settings saved before languages existed', () => {
+    const project = ProjectSchema.parse({
+      name: 'P',
+      role: '',
+      goal: '',
+      context: 'c',
+      keywords: [],
+    });
+    expect(meetingLanguage(project)).toBe('en');
+  });
+  it('accepts every supported language and rejects others', () => {
+    const preferences = {
+      tone: 'professional',
+      length: 'standard',
+      strictContext: false,
+      silenceMs: 700,
+    };
+    for (const language of ['en', 'sk', 'cs', 'de', 'auto'])
+      expect(
+        ProjectSchema.safeParse({
+          name: 'P',
+          role: '',
+          goal: '',
+          context: 'c',
+          keywords: [],
+          preferences: { ...preferences, language },
+        }).success,
+      ).toBe(true);
+    expect(
+      ProjectSchema.safeParse({
+        name: 'P',
+        role: '',
+        goal: '',
+        context: 'c',
+        keywords: [],
+        preferences: { ...preferences, language: 'fr' },
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('transcription languages', () => {
+  it('sends the fixed meeting language', () => {
+    expect(transcriptionLanguages('sk')).toEqual(['sk']);
+    expect(transcriptionLanguages('de')).toEqual(['de']);
+  });
+  it('lists every supported language in automatic mode', () => {
+    expect(transcriptionLanguages('auto')).toEqual(['en', 'sk', 'cs', 'de']);
+  });
+});
+
+describe('question detection per language', () => {
+  for (const [language, sample] of Object.entries(examples) as [
+    'sk' | 'cs' | 'de',
+    (typeof examples)['sk'],
+  ][]) {
+    it(`${language}: finds wh-questions and yes/no questions, not statements`, () => {
+      expect(inspectQuestion(sample.question, language)).toEqual({
+        candidate: true,
+        complete: true,
+      });
+      expect(inspectQuestion(sample.yesNo, language).candidate).toBe(true);
+      expect(inspectQuestion(sample.statement, language).candidate).toBe(false);
+    });
+    it(`${language}: a question mark from the transcriber always counts`, () => {
+      expect(inspectQuestion(`${sample.statement}?`, language).candidate).toBe(true);
+    });
+    it(`${language}: automatic mode detects it too`, () => {
+      expect(inspectQuestion(sample.question, 'auto').candidate).toBe(true);
+      expect(inspectQuestion(sample.statement, 'auto').candidate).toBe(false);
+    });
+  }
+  it('English detection is unchanged and still rejects unfinished clauses', () => {
+    expect(inspectQuestion('What is the budget for the pilot', 'en')).toEqual({
+      candidate: true,
+      complete: true,
+    });
+    expect(inspectQuestion('What is the budget and', 'en').complete).toBe(false);
+    expect(inspectQuestion('Kedy začína pilotný projekt', 'en').candidate).toBe(false);
+  });
+  it('a fixed non-English language ignores English cues', () => {
+    expect(inspectQuestion('What is the budget', 'sk').candidate).toBe(false);
+  });
+  it('the question engine uses its language', () => {
+    const engine = new QuestionEngine('de');
+    const { question } = engine.update({
+      id: 's1',
+      sequence: 0,
+      text: examples.de.question,
+      at: Date.now(),
+      final: true,
+    });
+    expect(question?.text).toContain('Pilotprojekt');
+  });
+});
+
+describe('answer prompt language', () => {
+  it('keeps the English prompt unchanged', () => {
+    expect(systemPrompt('en')).toBe(SYSTEM_PROMPT);
+    expect(languageInstruction('en')).toBe('');
+  });
+  it('asks for answers in a fixed language with English coaching', () => {
+    expect(systemPrompt('sk')).toContain('concise Slovak answers');
+    expect(languageInstruction('cs')).toContain('natural spoken Czech');
+    expect(languageInstruction('de')).toContain('recommendation and missingInformation in English');
+  });
+  it('asks for the language of the question in automatic mode', () => {
+    expect(systemPrompt('auto')).toContain('in the language of the question');
+    expect(languageInstruction('auto')).toContain('language of latestQuestion');
+  });
+});
+
+const decision: Decision = {
+  action: 'suggest',
+  responseType: 'answer',
+  category: 'question',
+  triggerSegmentIds: ['s1'],
+  topicKey: 'pilot',
+  recommendation: 'Say what you know.',
+  suggestedResponse: 'x',
+  groundedFactIds: [],
+  missingInformation: [],
+};
+
+describe('localized spoken phrases', () => {
+  it('every language has a full set', () => {
+    for (const language of SPOKEN_LANGUAGES) {
+      const p = PHRASES[language];
+      expect(p.quick.length).toBe(PHRASES.en.quick.length);
+      expect(p.technical.length).toBe(PHRASES.en.technical.length);
+      expect(p.acknowledgement.length).toBe(PHRASES.en.acknowledgement.length);
+      for (const text of [p.clarifyPoint, p.clarifyOption, p.noVerifiedInfo])
+        expect(text).toBeTruthy();
+    }
+  });
+  it('automatic mode falls back to English phrases', () => {
+    expect(phrasesFor('auto')).toBe(PHRASES.en);
+  });
+  for (const language of ['sk', 'cs', 'de'] as MeetingLanguage[])
+    it(`${language}: fallbacks are spoken in the meeting language and skip review`, () => {
+      const result = fallback(
+        decision,
+        'No support.',
+        examples[language as 'sk'].question,
+        language,
+      );
+      expect(PHRASES[language as 'sk'].quick).toContain(result.suggestedResponse);
+      expect(isSafeTemplate(result.suggestedResponse)).toBe(true);
+      const ack = fallback(decision, 'No support.', examples[language as 'sk'].statement, language);
+      expect(PHRASES[language as 'sk'].acknowledgement).toContain(ack.suggestedResponse);
+    });
+});
+
+describe('English wording checks', () => {
+  const project = (language: MeetingLanguage) => ({
+    name: 'P',
+    role: '',
+    goal: '',
+    context: '[CLAIM PLANNED | plan.pdf]\nThe pilot is planned for March.',
+    keywords: [],
+    preferences: {
+      tone: 'professional' as const,
+      length: 'standard' as const,
+      strictContext: false,
+      silenceMs: 700,
+      language,
+    },
+  });
+  const planned = (language: MeetingLanguage, text: string) => {
+    const id = factsForProject(project(language))[0].id;
+    return {
+      ...decision,
+      suggestedResponse: text,
+      groundedFactIds: [id],
+      projectClaims: [{ factId: id, status: 'PLANNED' as const }],
+    };
+  };
+  it('detects English wording in automatic mode only when the answer is English', () => {
+    expect(englishWording('We start the pilot in March.', 'auto')).toBe(true);
+    expect(englishWording('Pilot začneme v marci.', 'auto')).toBe(false);
+    expect(englishWording('Pilot začneme v marci.', 'en')).toBe(true);
+    expect(englishWording('We start the pilot in March.', 'sk')).toBe(false);
+  });
+  it('still demands planned wording from an English answer', () => {
+    const answer = planned('en', 'The pilot starts in March.');
+    expect(claimProblem(answer, project('en'))).toBe('Missing proposed or planned qualification');
+    expect(qualifyProposal(answer, project('en')).suggestedResponse).toBe(
+      'The proposed pilot starts in March.',
+    );
+  });
+  it('does not demand English wording from a Slovak answer', () => {
+    const answer = planned('sk', 'Pilot začne v marci.');
+    expect(claimProblem(answer, project('sk'))).toBeUndefined();
+    expect(qualifyProposal(answer, project('sk')).suggestedResponse).toBe('Pilot začne v marci.');
+  });
+});

@@ -16,8 +16,8 @@ them before it is shown.
 There is no noclue account and no noclue server. You use your own OpenAI key (and optionally
 your own Anthropic key), so you pay the AI provider directly and only for what you use.
 
-> **Status:** public beta (0.4.0). English meetings only. Chrome desktop with Google Meet or
-> Microsoft Teams on the web.
+> **Status:** public beta (0.5.0). Meetings in English, Slovak, Czech or German. Chrome desktop with
+> Google Meet or Microsoft Teams on the web.
 
 ## Install
 
@@ -52,8 +52,10 @@ fact-checked). See [OpenAI pricing](https://openai.com/api/pricing/) and
 - **Headphones** help noclue tell your voice from the meeting. Your microphone never leaves your
   computer. It only tells noclue when you are speaking, so automatic answers wait for you.
 - **Answer Now** asks for an answer immediately, even while you speak.
-- **Show cue window** opens a small movable window over the meeting. Hide it before you share
-  your screen.
+- **Show cue window** opens a small movable window over the meeting. Click **Pop out** in it to
+  move the cue into a separate floating window: sharing a tab or a window does not show it. When
+  you share from the meeting's Present button, noclue hides the cue in the page, and hides the
+  floating window too if you share your whole screen. It comes back when sharing stops.
 - **Stop** ends listening and clears the transcript. Closing the panel alone keeps listening.
 - **Try a practice question** shows how your facts support an answer, without recording audio.
 - **Stick to my knowledge** limits answers to your facts. Turned off, general questions can be
@@ -75,8 +77,12 @@ Full policy: [PRIVACY.md](PRIVACY.md).
 
 ## Limits
 
-- English meetings only. Speaker names are not recognised.
+- Meetings in English, Slovak, Czech and German, or Automatic, which answers in the language of
+  each question. The interface and coaching are in English. Speaker names are not recognised.
 - Chrome desktop only. The Teams desktop app cannot be captured: open the meeting in Chrome.
+- Screen-share detection only sees shares started from the meeting page itself. A share started
+  from another app or from macOS or Windows is not detected, and a whole-screen share also shows
+  the side panel.
 - noclue cannot see whether you are muted, whether a question was meant for you, or what you
   already said. Answers are only as good as the facts you add.
 

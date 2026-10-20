@@ -9,7 +9,7 @@ Everything here is free except the one-time Chrome Web Store developer fee (5 US
 2. `npm run typecheck && npm test && npm run test:browser && npm run secrets:check`
 3. One real meeting check with your own keys: Setup guide, Check, a Google Meet call with a
    second participant asking English questions, Answer Now, cue window, Stop. Repeat once with
-   Anthropic selected.
+   Anthropic selected, and once with the meeting language set to Slovak and Slovak questions.
 4. `npm run package` creates `release/noclue-<version>.zip`.
 
 ## First public release (one time)

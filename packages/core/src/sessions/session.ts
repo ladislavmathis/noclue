@@ -2,6 +2,7 @@ import {
   LIMITS,
   PROMPT_VERSION,
   factsForProject,
+  meetingLanguage,
   pruneSegments,
   type Project,
   type QuestionState,
@@ -30,7 +31,7 @@ type Attempt = {
 export class MeetingSession {
   segments: Segment[] = [];
   recent: Suggestion[] = [];
-  private engine = new QuestionEngine();
+  private engine: QuestionEngine;
   private stopped = false;
   private retryUntil = 0;
   private disabled = false;
@@ -56,6 +57,7 @@ export class MeetingSession {
     private testMode = false,
     private model = 'configured',
   ) {
+    this.engine = new QuestionEngine(meetingLanguage(project));
     this.expiry = setInterval(() => {
       this.segments = pruneSegments(this.segments);
       const q = this.engine.current;
@@ -195,7 +197,7 @@ export class MeetingSession {
       // An explicit Answer Now keeps running; its result is delivered for the question as asked.
       if (this.active?.mode !== 'manual') this.cancelActive('Question changed');
       this.discardDraft('Question changed');
-      if (question && inspectQuestion(question.text).candidate)
+      if (question && inspectQuestion(question.text, meetingLanguage(this.project)).candidate)
         this.log('question.candidate', { question: question.text });
     }
     this.publishQuestion();
@@ -255,7 +257,7 @@ export class MeetingSession {
       ['ANSWERING', 'FAILED', 'SKIPPED', 'CANCELLED'].includes(q.state)
     )
       return;
-    if (!inspectQuestion(q.text).candidate) {
+    if (!inspectQuestion(q.text, meetingLanguage(this.project)).candidate) {
       this.settleNonQuestion();
       return;
     }
@@ -264,7 +266,7 @@ export class MeetingSession {
       return;
     }
     const settle = this.engine.settleIn();
-    const complete = inspectQuestion(q.text).complete;
+    const complete = inspectQuestion(q.text, meetingLanguage(this.project)).complete;
     if (
       (this.active || this.draft || !complete) &&
       this.engine.finalized &&
@@ -299,7 +301,7 @@ export class MeetingSession {
     if (
       !q ||
       ['ANSWERING', 'FAILED', 'SKIPPED', 'CANCELLED', 'LISTENING'].includes(q.state) ||
-      inspectQuestion(q.text).candidate ||
+      inspectQuestion(q.text, meetingLanguage(this.project)).candidate ||
       !this.engine.finalized ||
       this.engine.speaking
     )

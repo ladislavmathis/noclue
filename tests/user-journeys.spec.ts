@@ -53,6 +53,7 @@ test.afterEach(async () => {
 test('response controls persist and keep microphone privacy unchanged', async () => {
   const page = await panel();
   await page.getByLabel('Response style', { exact: true }).selectOption('executive');
+  await page.getByLabel('Meeting language', { exact: true }).selectOption('sk');
   await page.getByLabel('Response length', { exact: true }).selectOption('detailed');
   await page.getByLabel('Stick to my knowledge').uncheck();
   await page.getByRole('slider', { name: 'Silence threshold', exact: true }).fill('1500');
@@ -60,6 +61,8 @@ test('response controls persist and keep microphone privacy unchanged', async ()
   await page.reload();
   await page.getByRole('button', { name: /^Settings/ }).click();
   await expect(page.getByLabel('Response style', { exact: true })).toHaveValue('executive');
+  await expect(page.getByLabel('Meeting language', { exact: true })).toHaveValue('sk');
+  expect((await stored(page)).project.preferences.language).toBe('sk');
   await expect(page.getByLabel('Response length', { exact: true })).toHaveValue('detailed');
   await expect(page.getByLabel('Stick to my knowledge')).not.toBeChecked();
   await expect(page.getByRole('slider', { name: 'Silence threshold', exact: true })).toHaveValue(

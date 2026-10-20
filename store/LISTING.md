@@ -42,7 +42,8 @@ Private by design
 • No analytics, no tracking.
 
 Good to know
-• English meetings, Chrome desktop, Google Meet and Microsoft Teams on the web.
+• Meetings in English, Slovak, Czech or German. The interface is in English.
+• Chrome desktop, Google Meet and Microsoft Teams on the web.
 • Headphones work best.
 • Transcribing other people may need their consent where you live.
 
@@ -55,16 +56,16 @@ user provides, by transcribing the meeting tab the user selects.
 
 ## Permission justifications
 
-| Permission                         | Why it is needed                                                                                                                                                        |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tabCapture`                       | Captures audio of the meeting tab the user starts noclue on, so other participants can be transcribed. Only after the user clicks the toolbar icon and Start Listening. |
-| `offscreen`                        | Runs audio capture, playback passthrough and local voice detection in an offscreen document that keeps working while the side panel is closed.                          |
-| `sidePanel`                        | Shows answers, the transcript and settings next to the meeting.                                                                                                         |
-| `storage`                          | Saves the user's API keys, project facts and preferences locally on the device.                                                                                         |
-| `activeTab`                        | Grants access to the meeting tab only when the user clicks the toolbar icon there.                                                                                      |
-| `scripting`                        | Injects the optional cue window into the active meeting tab when the user asks for it.                                                                                  |
-| Host `https://api.openai.com/*`    | Sends meeting audio for transcription and, if chosen, requests answers, with the user's own key.                                                                        |
-| Host `https://api.anthropic.com/*` | Requests answers from Claude with the user's own key, only if the user chooses Anthropic.                                                                               |
+| Permission                         | Why it is needed                                                                                                                                                                                                                                                                  |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tabCapture`                       | Captures audio of the meeting tab the user starts noclue on, so other participants can be transcribed. Only after the user clicks the toolbar icon and Start Listening.                                                                                                           |
+| `offscreen`                        | Runs audio capture, playback passthrough and local voice detection in an offscreen document that keeps working while the side panel is closed.                                                                                                                                    |
+| `sidePanel`                        | Shows answers, the transcript and settings next to the meeting.                                                                                                                                                                                                                   |
+| `storage`                          | Saves the user's API keys, project facts and preferences locally on the device.                                                                                                                                                                                                   |
+| `activeTab`                        | Grants access to the meeting tab only when the user clicks the toolbar icon there.                                                                                                                                                                                                |
+| `scripting`                        | Injects the optional cue window into the active meeting tab when the user asks for it, and a read-only observer that notices when the meeting page starts a screen share so the cue can hide itself. The observer returns the page's stream unchanged and sends nothing anywhere. |
+| Host `https://api.openai.com/*`    | Sends meeting audio for transcription and, if chosen, requests answers, with the user's own key.                                                                                                                                                                                  |
+| Host `https://api.anthropic.com/*` | Requests answers from Claude with the user's own key, only if the user chooses Anthropic.                                                                                                                                                                                         |
 
 Remote code: **No.** All JavaScript, the WebAssembly runtime, the voice detection model and the
 fonts are bundled in the package. `wasm-unsafe-eval` is needed only to run the bundled ONNX

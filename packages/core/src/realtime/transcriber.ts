@@ -1,5 +1,15 @@
-import { LIMITS, type Project, type Segment } from '@noclue/shared';
+import {
+  LIMITS,
+  SPOKEN_LANGUAGES,
+  meetingLanguage,
+  type MeetingLanguage,
+  type Project,
+  type Segment,
+} from '@noclue/shared';
 import { ProviderError, billingError } from '../recommendations/errors.js';
+/** Expected input languages for the transcription model; automatic mode lists every supported one. */
+export const transcriptionLanguages = (language: MeetingLanguage): string[] =>
+  language === 'auto' ? [...SPOKEN_LANGUAGES] : [language];
 export interface Transcriber {
   connect(): Promise<void>;
   append(audio: Uint8Array): void;
@@ -70,7 +80,7 @@ export class OpenAITranscriber implements Transcriber {
                 format: { type: 'audio/pcm', rate: 24000 },
                 transcription: {
                   model: this.model,
-                  languages: ['en'],
+                  languages: transcriptionLanguages(meetingLanguage(this.project)),
                   keywords: this.project.keywords,
                   delay: 'low',
                 },

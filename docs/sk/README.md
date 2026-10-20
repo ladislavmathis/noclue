@@ -30,7 +30,8 @@ limitom.
 - Prepis iných ľudí môže vyžadovať ich súhlas. Informujte účastníkov, ak to pravidlá alebo
   situácia vyžadujú.
 
-Používateľské rozhranie je v angličtine, lebo noclue pomáha pri anglických meetingoch. Názov a
-popis rozšírenia sú preložené. Podrobnosti v [README](../../README.md) a [PRIVACY](../../PRIVACY.md).
+noclue funguje na meetingoch v angličtine, slovenčine, češtine a nemčine. V nastaveniach zvoľte
+jazyk meetingu, alebo Automaticky, a odpoveď príde v jazyku otázky. Rozhranie a tipy sú v
+angličtine, názov a popis rozšírenia sú preložené. Podrobnosti v [README](../../README.md) a [PRIVACY](../../PRIVACY.md).
 
 noclue vyvíja [ignition.sk](https://ignition.sk).

@@ -77,6 +77,12 @@ function App() {
       .catch(() => {});
     const listener = (m: any) => {
       if (m.target === 'panel' && m.type === 'state') setState(m.state);
+      if (m.target === 'panel' && m.type === 'cue.share')
+        setNotice(
+          m.hidden
+            ? 'Cue hidden while you share. It comes back when sharing stops.'
+            : 'Sharing stopped. The cue is visible again.',
+        );
     };
     const changed = (changes: Record<string, chrome.storage.StorageChange>) => {
       if (changes.microphoneCheck) setMicCheck(changes.microphoneCheck.newValue ?? null);
@@ -671,7 +677,9 @@ function App() {
             .then((result) => {
               if (result?.error) setNotice(result.error);
               else
-                setNotice('Cue window opened on your meeting tab. Hide it before screen sharing.');
+                setNotice(
+                  'Cue window opened on your meeting tab. Click Pop out in it to keep it off shared tabs and windows.',
+                );
             })
             .catch(() =>
               setNotice(

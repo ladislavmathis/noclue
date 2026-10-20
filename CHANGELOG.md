@@ -7,6 +7,22 @@ musia mať rovnakú hodnotu (stráži to `tests/version.test.ts`).
 Číslovanie: **MAJOR.MINOR.PATCH** — PATCH pre opravy, MINOR pre nové funkcie, MAJOR pre
 nekompatibilné zmeny. Pri každej verzii pribudne záznam sem a git tag `vX.Y.Z`.
 
+## 0.5.0 — 20. 10. 2026
+
+- **Jazyk meetingu:** angličtina, slovenčina, čeština, nemčina alebo Automaticky. Nastavuje sa v
+  Response preferences. Prepis dostane jazyk ako očakávaný vstup, odpovede sa píšu v jazyku
+  meetingu, tipy a rozhranie ostávajú anglicky. Automaticky odpovedá v jazyku otázky.
+- **Rozpoznanie otázok** má slovenské, české a nemecké opytovacie slová. Anglická kontrola
+  nedokončenej vety beží len pre angličtinu.
+- **Náhradné vety** (požiadanie o zopakovanie, odklad technickej otázky, poďakovanie,
+  upresnenie) sú preložené do všetkých jazykov. Kontroly anglických formulácií bežia len pri
+  anglických odpovediach. Fact-check porovnáva význam naprieč jazykmi.
+- **Cue okno mimo zdieľania:** tlačidlo Pop out presunie cue do samostatného plávajúceho okna
+  (Document Picture-in-Picture), ktoré zdieľanie karty ani okna nezachytí. Pri zdieľaní
+  spustenom zo stránky meetingu sa cue v stránke skryje a pri zdieľaní celej obrazovky aj
+  plávajúce okno. Po skončení zdieľania sa vráti.
+- Prompt `quick-b2-v05.0-languages`, fact-check `evidence-review-v4.5-languages`.
+
 ## 0.4.0 — 20. 10. 2026
 
 Prvá verejná verzia pod názvom **noclue by ignition**. Protokol 5. Nekompatibilné so starým

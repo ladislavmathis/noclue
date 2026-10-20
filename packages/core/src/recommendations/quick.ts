@@ -1,30 +1,45 @@
-import { factsForProject, type Decision, type Project, type QuickDecision } from '@noclue/shared';
+import {
+  factsForProject,
+  meetingLanguage,
+  type Decision,
+  type MeetingLanguage,
+  type Project,
+  type QuickDecision,
+} from '@noclue/shared';
 import { inspectQuestion } from '../questions/engine.js';
+import { ALL_PHRASES, PHRASES, phrasesFor } from './phrases.js';
 /**
  * Spoken when no supported answer could be verified: a polite request to repeat or narrow the
  * question keeps the floor without guessing. Varied by topic so repeated gaps do not sound canned.
+ * English versions; every meeting language has its own set in phrases.ts.
  */
-export const QUICK_FALLBACKS = [
-  'Could you say a bit more about what you have in mind? I want to give you a precise answer.',
-  'Could you repeat the question? I want to make sure I address exactly what you are asking.',
-  'That is a fair question. Which aspect matters most to you, so I can answer it precisely?',
-  'Let me make sure I understand you correctly. Could you rephrase that for me?',
-] as const;
+export const QUICK_FALLBACKS = PHRASES.en.quick;
 /** For detailed technical questions the honest move is to defer to the development team. */
-export const TECHNICAL_FALLBACKS = [
-  'That is a detailed technical question. I would rather check it with our development team and come back to you with a precise answer.',
-  'I do not want to guess on the technical details. Let me confirm that with our development team and follow up right after the call.',
-] as const;
+export const TECHNICAL_FALLBACKS = PHRASES.en.technical;
 /** A statement rather than a question deserves an acknowledgment, not a request to repeat it. */
-export const ACKNOWLEDGEMENT_FALLBACKS = [
-  'Thank you, understood. Please reach out anytime if anything comes up on your side.',
-  'Thank you, that works for us. Let us keep in touch on the next steps.',
-] as const;
+export const ACKNOWLEDGEMENT_FALLBACKS = PHRASES.en.acknowledgement;
 export const ALL_FALLBACKS = [
   ...QUICK_FALLBACKS,
   ...TECHNICAL_FALLBACKS,
   ...ACKNOWLEDGEMENT_FALLBACKS,
-] as const;
+];
+/**
+ * The wording checks below match English phrases. In a fixed non-English meeting they would
+ * misfire (an answer can never contain "proposed"), so they run only for English answers.
+ * In automatic mode the answer itself decides: it counts as English when common English
+ * function words make up a clear share of it.
+ */
+export function englishWording(text: string, language: MeetingLanguage) {
+  if (language === 'en') return true;
+  if (language !== 'auto') return false;
+  const words = text.toLowerCase().match(/\p{L}+/gu) ?? [];
+  const english = words.filter((w) =>
+    /^(?:the|a|an|and|or|is|are|was|were|we|i|you|it|to|of|in|on|for|with|that|this|have|has|not|be|will|would|can|could)$/.test(
+      w,
+    ),
+  ).length;
+  return words.length > 0 && english / words.length >= 0.2;
+}
 export const QUICK_FALLBACK = QUICK_FALLBACKS[0];
 const TECHNICAL_TERMS =
   /\b(?:architecture|algorithm|api|apis|latency|throughput|accuracy|precision|recall|benchmark|benchmarks|dataset|datasets|training|inference|implementation|implemented|integration|integrated|encryption|encrypted|security|infrastructure|pipeline|ontology|framework|protocol|database|deployment|deployed|scalability|source code|software|hardware|technical|technically|parameters|metrics|neural|llm|llms|transformer|embedding|embeddings|vector|tokens|gpu|compute|model|models|detection|detector|classifier|fine-?tun\w*|hallucinat\w*|retriev\w*)\b/i;
@@ -51,9 +66,11 @@ export function fallback(
   decision: Decision & Partial<QuickDecision>,
   reason: string,
   question?: string,
+  language: MeetingLanguage = 'en',
 ) {
   const technical = technicalQuestion(question);
-  const statement = !!question?.trim() && !inspectQuestion(question).candidate;
+  const statement = !!question?.trim() && !inspectQuestion(question, language).candidate;
+  const phrases = phrasesFor(language);
   return {
     ...decision,
     action: 'suggest' as const,
@@ -62,7 +79,7 @@ export function fallback(
     answerBasis: 'insufficient' as const,
     suggestedResponse: pickFallback(
       decision.topicKey || decision.suggestedResponse,
-      statement ? ACKNOWLEDGEMENT_FALLBACKS : technical ? TECHNICAL_FALLBACKS : QUICK_FALLBACKS,
+      statement ? phrases.acknowledgement : technical ? phrases.technical : phrases.quick,
     ),
     recommendation: statement
       ? 'No question was asked: acknowledge briefly and keep the floor.'
@@ -90,6 +107,8 @@ export function claimProblem(
     if (claim.status !== null && (fact.status === null || ranks[claim.status] > ranks[fact.status]))
       return 'Claim status exceeds its evidence';
   }
+  // Everything below inspects English wording.
+  if (!englishWording(decision.suggestedResponse, meetingLanguage(project))) return undefined;
   if (
     /\bwe (?:have )?(?:not|never) (?:conducted|run|completed|performed)\b/i.test(
       decision.suggestedResponse,
@@ -196,6 +215,8 @@ export function qualifyProposal(decision: Decision & Partial<QuickDecision>, pro
     );
   if (problem !== 'Missing proposed or planned qualification' && !needsSourceQualification)
     return decision;
+  // The automatic prefix is English; other languages get it from the prompt instead.
+  if (!englishWording(decision.suggestedResponse, meetingLanguage(project))) return decision;
   const text = decision.suggestedResponse;
   return {
     ...decision,
@@ -266,11 +287,9 @@ export function currentQuestion(text: string) {
 // Only exact application-owned text bypasses model review, never a responseType or empty citations.
 export function isSafeTemplate(text: string) {
   return new Set([
-    ...ALL_FALLBACKS,
+    ...ALL_PHRASES,
     'My specific responsibilities are not documented in these notes, so I need to confirm them.',
     '[Explain your real reason for joining this project, using only details that are true for you.]',
     '[Describe your verified experience and one real example; if you have none, say so.]',
-    'Could you clarify which point you mean? I need a little more context to answer accurately.',
-    'Could you clarify which option you mean? I need that detail to answer accurately.',
   ]).has(text);
 }
