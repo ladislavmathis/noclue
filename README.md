@@ -4,6 +4,8 @@
 
 <p align="center"><strong>Short, calm answers for your Google Meet and Microsoft Teams calls, based on your own facts.</strong></p>
 
+<p align="center">Developed by <a href="https://ignition.sk">ignition.sk</a></p>
+
 noclue is a Chrome extension. It listens to the other people in your meeting tab, notices when
 someone asks you something, and shows a short answer you can say in your own words. Answers
 come from the project facts and profile you add, and every factual sentence is checked against
@@ -92,3 +94,5 @@ Load `apps/extension/dist` as an unpacked extension. Tests, architecture and rel
 
 Code: [MIT](LICENSE). The names noclue and ignition and their logos are not covered by the MIT
 license. Third-party components: [NOTICES.md](NOTICES.md).
+
+noclue is developed and maintained by [ignition.sk](https://ignition.sk).

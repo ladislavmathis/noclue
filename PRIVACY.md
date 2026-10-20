@@ -4,7 +4,8 @@ _Last updated: 20 October 2026. Applies to the noclue by ignition Chrome extensi
 and later._
 
 noclue is a Chrome extension that helps you answer questions during online meetings. It has no
-server, no user accounts and no analytics. The developer of noclue receives none of your data.
+server, no user accounts and no analytics. noclue is developed by ignition.sk
+(https://ignition.sk). The developer receives none of your data.
 
 ## What noclue processes and where it goes
 

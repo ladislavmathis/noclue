@@ -32,3 +32,5 @@ limitom.
 
 Používateľské rozhranie je v angličtine, lebo noclue pomáha pri anglických meetingoch. Názov a
 popis rozšírenia sú preložené. Podrobnosti v [README](../../README.md) a [PRIVACY](../../PRIVACY.md).
+
+noclue vyvíja [ignition.sk](https://ignition.sk).

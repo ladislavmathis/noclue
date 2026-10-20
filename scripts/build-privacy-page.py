@@ -58,7 +58,7 @@ page = f'''<!doctype html>
       <main class="prose">
 {body}
       </main>
-      <footer><span>noclue by ignition</span><span>Generated from PRIVACY.md</span></footer>
+      <footer><span>noclue by <a href="https://ignition.sk">ignition.sk</a></span><span>Generated from PRIVACY.md</span></footer>
     </div>
   </body>
 </html>
