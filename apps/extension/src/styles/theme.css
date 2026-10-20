@@ -1,0 +1,37 @@
+@import './brand-tokens.css';
+@import './fonts.css';
+/*
+ * App-level semantic tokens built on the brand tokens. Orange is the only accent: one main
+ * action per screen. No shadows, glows or outlines as decoration. Light is the default;
+ * dark follows the system setting.
+ */
+:root {
+  --nc-bg: var(--nc-paper);
+  --nc-card: var(--nc-surface);
+  --nc-fg: var(--nc-text);
+  --nc-fg-2: var(--nc-text-secondary);
+  --nc-fg-3: var(--nc-muted);
+  --nc-border: var(--nc-line);
+  --nc-field: var(--nc-surface);
+  --nc-accent-ui: var(--nc-accent);
+  --nc-on-accent: #ffffff;
+  --nc-subtle: #ebe8e3;
+  --nc-focus: var(--nc-accent);
+  --nc-radius-control: 12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nc-bg: var(--nc-ink);
+    --nc-card: #201f1e;
+    --nc-fg: var(--nc-paper);
+    --nc-fg-2: #d6d1cb;
+    --nc-fg-3: var(--nc-muted-on-dark);
+    --nc-border: #34312e;
+    --nc-field: #1c1b1a;
+    --nc-accent-ui: var(--nc-accent-on-dark);
+    --nc-on-accent: var(--nc-ink);
+    --nc-subtle: #2a2826;
+    color-scheme: dark;
+  }
+}

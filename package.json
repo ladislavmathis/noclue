@@ -1,0 +1,50 @@
+{
+  "name": "noclue",
+  "version": "0.4.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @noclue/extension",
+    "build": "npm run build -w @noclue/extension",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:browser": "npm run build:test && playwright test",
+    "eval:quality": "tsx scripts/evaluate-quality.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:soak": "npm run build:test && NOCLUE_SOAK_SECONDS=1800 playwright test tests/capture.spec.ts --output=soak-results",
+    "eval:session": "tsx scripts/summarize-session.ts",
+    "icons": "node scripts/build-icons.mjs",
+    "build:test": "NOCLUE_TEST_HUB=1 npm run build -w @noclue/extension",
+    "package": "npm run build && node scripts/package-extension.mjs",
+    "secrets:check": "node scripts/check-secrets.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/ws": "^8.5.13",
+    "concurrently": "^9.1.2",
+    "dotenv": "^18.0.8",
+    "esbuild": "^0.25.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.4.3",
+    "vitest": "^4.1.11",
+    "wawoff2": "^2.0.1",
+    "ws": "^8.22.0"
+  },
+  "description": "noclue by ignition: short, calm answers during Google Meet and Teams calls, using your own OpenAI or Anthropic API key.",
+  "license": "MIT",
+  "private": true
+}

@@ -1,0 +1,39 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CWS_ENABLED: ${{ secrets.CWS_REFRESH_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run secrets:check
+      - run: npm run typecheck
+      - run: npm test
+      - name: Check tag matches package version
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: npm run package
+      - name: GitHub release with the store zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release/noclue-*.zip --title "noclue $GITHUB_REF_NAME" --notes "See CHANGELOG.md. Install from the Chrome Web Store, or unzip and use Load unpacked in chrome://extensions."
+      - name: Upload to the Chrome Web Store (only when the secrets are set)
+        if: env.CWS_ENABLED == 'true'
+        env:
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+        run: >
+          npx --yes chrome-webstore-upload-cli@3 upload --source release/noclue-*.zip
+          --extension-id "$CWS_EXTENSION_ID" --client-id "$CWS_CLIENT_ID"
+          --client-secret "$CWS_CLIENT_SECRET" --refresh-token "$CWS_REFRESH_TOKEN"

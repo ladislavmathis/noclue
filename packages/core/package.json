@@ -1,0 +1,12 @@
+{
+  "name": "@noclue/core",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@noclue/shared": "*",
+    "openai": "^6.0.0",
+    "zod": "^3.24.2"
+  }
+}

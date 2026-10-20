@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "noclue by ignition",
+    "description": "Extension name in Chrome and the Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Short, calm answers for your Google Meet and Teams calls, based on your own facts. Uses your own OpenAI or Anthropic key.",
+    "description": "Short description, at most 132 characters."
+  },
+  "actionTitle": {
+    "message": "Open noclue",
+    "description": "Toolbar button tooltip."
+  }
+}

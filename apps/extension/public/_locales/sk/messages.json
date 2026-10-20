@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "noclue by ignition",
+    "description": "Názov rozšírenia v Chrome a v Chrome Web Store."
+  },
+  "extDescription": {
+    "message": "Krátke a pokojné odpovede počas hovorov v Google Meet a Teams z vašich faktov. S vlastným kľúčom OpenAI alebo Anthropic.",
+    "description": "Krátky popis, najviac 132 znakov."
+  },
+  "actionTitle": {
+    "message": "Otvoriť noclue",
+    "description": "Popis tlačidla v lište."
+  }
+}

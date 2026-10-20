@@ -1,0 +1,38 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Never paste API keys, meeting transcripts or private project facts here.
+  - type: input
+    id: version
+    attributes:
+      label: noclue version
+      description: Shown in the lower-right corner of the panel, for example v0.4.0.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Meeting platform
+      options: [Google Meet, Microsoft Teams (web), Other]
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Answer provider
+      options: [OpenAI, Anthropic]
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: input
+    id: chrome
+    attributes:
+      label: Chrome version and operating system

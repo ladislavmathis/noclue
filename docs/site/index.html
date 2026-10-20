@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>noclue by ignition</title>
+    <meta
+      name="description"
+      content="Short, calm answers for your Google Meet and Teams calls, based on your own facts. Chrome extension, your own OpenAI or Anthropic key."
+    />
+    <link rel="icon" href="img/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <a class="logo" href="./"><img src="img/noclue-icon.svg" alt="" />noclue</a>
+        <nav>
+          <a href="#how">How it works</a><a href="privacy.html">Privacy</a
+          ><a href="https://github.com/" data-repo>GitHub</a>
+        </nav>
+      </header>
+      <main>
+        <section class="hero">
+          <span class="eyebrow">Not knowing is normal</span>
+          <h1>A short, calm answer when someone asks you something.</h1>
+          <p class="lead">
+            noclue is a Chrome extension for Google Meet and Microsoft Teams. It listens to the
+            meeting, notices a question and suggests one to three sentences you can say in your own
+            words, based only on the facts you give it.
+          </p>
+          <div class="cta">
+            <a class="button primary" href="#install" data-store>Add to Chrome</a>
+            <a class="button" href="#how">How it works</a>
+          </div>
+        </section>
+        <section class="grid" aria-label="Why noclue">
+          <div class="card">
+            <h3>Checked against your facts</h3>
+            <p>
+              Every factual sentence is checked before you see it. Unknown numbers stay unknown.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Your own key, no account</h3>
+            <p>
+              Use your OpenAI key, and Claude by Anthropic if you like. You pay the provider
+              directly.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Your microphone stays here</h3>
+            <p>It only tells noclue when you speak. There is no noclue server and no tracking.</p>
+          </div>
+        </section>
+        <section id="how">
+          <h2>How it works</h2>
+          <ol class="steps">
+            <li>
+              <div>
+                <strong>Install and connect.</strong> A three-minute guide asks for your API key,
+                tests your microphone and explains where your data goes.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Add a few facts.</strong> Your project, your role and what you want from the
+                meeting. Short notes are enough.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Start listening in the meeting tab.</strong> When someone asks you
+                something, a short answer appears in the side panel or a small cue window.
+              </div>
+            </li>
+          </ol>
+        </section>
+        <section id="install">
+          <h2>Install</h2>
+          <p class="lead">
+            noclue is free and open source. It works in Chrome on the desktop, for English meetings
+            in Google Meet and Microsoft Teams on the web. You need an
+            <a href="https://platform.openai.com/api-keys">OpenAI API key</a>.
+          </p>
+          <div class="cta" style="margin-bottom: 64px">
+            <a class="button primary" href="#install" data-store>Chrome Web Store</a>
+            <a class="button" href="https://github.com/" data-repo-releases>Download from GitHub</a>
+          </div>
+        </section>
+      </main>
+      <footer>
+        <span>noclue by ignition · MIT licensed</span>
+        <span><a href="privacy.html">Privacy policy</a></span>
+      </footer>
+    </div>
+    <script>
+      // Filled in once the store listing and repository exist (see docs/RELEASE.md).
+      const STORE_URL = '';
+      const REPO_URL = 'https://github.com/ladislavmathis/noclue';
+      if (STORE_URL) document.querySelectorAll('[data-store]').forEach((a) => (a.href = STORE_URL));
+      if (REPO_URL) {
+        document.querySelectorAll('[data-repo]').forEach((a) => (a.href = REPO_URL));
+        document
+          .querySelectorAll('[data-repo-releases]')
+          .forEach((a) => (a.href = REPO_URL + '/releases/latest'));
+      }
+    </script>
+  </body>
+</html>

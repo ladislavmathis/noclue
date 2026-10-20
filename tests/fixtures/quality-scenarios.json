@@ -1,0 +1,11 @@
+{
+  "warning": "Fictional evaluation fixture for the public repository.",
+  "project": {
+    "name": "Website relaunch",
+    "role": "Product lead",
+    "goal": "Agree the pilot scope",
+    "context": "The pilot starts in May.\n\nThe budget is not approved yet.\n\nThe team has two developers and one designer.",
+    "keywords": []
+  },
+  "scenarios": []
+}

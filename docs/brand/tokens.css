@@ -1,0 +1,27 @@
+:root {
+  /* colors */
+  --nc-orange-start: #FF7A3C;
+  --nc-orange-end: #F35216;
+  --nc-orange-gradient: linear-gradient(145deg, #FF7A3C, #F35216); /* icon tile only */
+  --nc-accent: #F35216;
+  --nc-ink: #171717;
+  --nc-text: #1A1614;
+  --nc-text-secondary: #4A4440;
+  --nc-muted: #7A726D;
+  --nc-paper: #F5F4F0;
+  --nc-surface: #FFFFFF;
+  --nc-line: #DEDAD4;
+  --nc-muted-on-dark: #B8B1AB;
+  --nc-accent-on-dark: #FF7A3C;
+  /* type */
+  --nc-font-brand: 'Anta', sans-serif;
+  --nc-font-ui: 'Manrope', sans-serif;
+  --nc-h1: 800 40px/1.1 var(--nc-font-ui);   /* letter-spacing -0.03em */
+  --nc-h2: 800 28px/1.15 var(--nc-font-ui);  /* letter-spacing -0.02em */
+  --nc-body: 500 17px/1.5 var(--nc-font-ui);
+  --nc-caption: 600 14px/1.4 var(--nc-font-ui);
+  /* radius */
+  --nc-radius-icon: 25%;   /* of tile side */
+  --nc-radius-card: 20px;
+  --nc-radius-swatch: 16px;
+}

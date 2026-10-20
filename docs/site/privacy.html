@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>noclue privacy policy</title>
+    <link rel="icon" href="img/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top"><a class="logo" href="./"><img src="img/noclue-icon.svg" alt="" />noclue</a><nav><a href="./">Home</a></nav></header>
+      <main class="prose">
+<h1>noclue privacy policy</h1>
+<p><em>Last updated: 20 October 2026. Applies to the noclue by ignition Chrome extension, version 0.4 and later.</em></p>
+<p>noclue is a Chrome extension that helps you answer questions during online meetings. It has no server, no user accounts and no analytics. The developer of noclue receives none of your data.</p>
+<h2>What noclue processes and where it goes</h2>
+<div class="table-scroll"><table><thead><tr><th>Data</th><th>When</th><th>Sent to</th><th>Stored</th></tr></thead><tbody><tr><td>Audio of the meeting tab you choose</td><td>Only while you are listening</td><td>OpenAI, for live transcription</td><td>Never written to disk</td></tr><tr><td>Your microphone</td><td>Only while you are listening, or during the microphone test</td><td>Nowhere. It is analysed on your computer only to detect when you speak</td><td>Never</td></tr><tr><td>Recent meeting transcript (up to 5 minutes)</td><td>When an answer is prepared</td><td>OpenAI or Anthropic, whichever you choose</td><td>In memory until you press Stop</td></tr><tr><td>Project facts, role, meeting goal and "About me" profile you enter</td><td>When an answer is prepared or you try a practice question</td><td>OpenAI or Anthropic, whichever you choose</td><td>In this Chrome profile (<code>chrome.storage.local</code>)</td></tr><tr><td>Your API keys</td><td>When noclue calls the provider</td><td>Only to the provider the key belongs to</td><td>In this Chrome profile (<code>chrome.storage.local</code>)</td></tr><tr><td>Preferences, microphone choice, cue window position</td><td>Never sent</td><td>Nowhere</td><td>In this Chrome profile</td></tr></tbody></table></div>
+<p>Requests go directly from your browser to <code>api.openai.com</code> and, if you choose Anthropic, <code>api.anthropic.com</code>. They are made with your own API keys under your own agreements with those providers. Their policies apply to what they receive:</p>
+<ul><li>OpenAI: <a href="https://openai.com/policies/privacy-policy">https://openai.com/policies/privacy-policy</a> and <a href="https://openai.com/enterprise-privacy">https://openai.com/enterprise-privacy</a></li><li>Anthropic: <a href="https://www.anthropic.com/legal/privacy">https://www.anthropic.com/legal/privacy</a> and <a href="https://www.anthropic.com/legal/commercial-terms">https://www.anthropic.com/legal/commercial-terms</a></li></ul>
+<p>noclue asks OpenAI not to store answer requests (<code>store: false</code>). This does not guarantee that a provider keeps no data. Check your provider account's data retention settings.</p>
+<h2>What noclue does not do</h2>
+<ul><li>It does not record or save meeting audio.</li><li>It does not send your microphone audio anywhere.</li><li>It does not sell, share or transfer data to anyone, and uses no data for advertising or creditworthiness.</li><li>It does not collect analytics, crash reports or usage statistics.</li><li>It does not read web pages other than the meeting tab you start it on, where it shows the optional cue window.</li></ul>
+<h2>Test mode</h2>
+<p>If you turn on test mode, questions, answers and timing are kept in memory so you can export them as a JSON file. Nothing is exported automatically. Stop, Clear test or closing the extension removes the recording.</p>
+<h2>Your choices</h2>
+<ul><li>Press <strong>Stop</strong> at any time to end listening and clear the transcript.</li><li>Delete your keys and project in Settings, or remove the extension to delete everything it stored.</li><li>Revoke an API key in your OpenAI or Anthropic account at any time.</li></ul>
+<h2>Other people in your meeting</h2>
+<p>Transcribing other participants may require their consent under the law where you or they are. You are responsible for informing participants and obtaining consent where required.</p>
+<h2>Children</h2>
+<p>noclue is not directed at children under 16.</p>
+<h2>Changes and contact</h2>
+<p>Changes to this policy are published in this file and noted in the changelog. Questions: open an issue at the project's GitHub repository or use the contact address in the Chrome Web Store listing.</p>
+      </main>
+      <footer><span>noclue by ignition</span><span>Generated from PRIVACY.md</span></footer>
+    </div>
+  </body>
+</html>
