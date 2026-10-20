@@ -2,6 +2,8 @@
   <img src="docs/brand/lockup-light.png" alt="noclue by ignition" width="420" />
 </p>
 
+<h3 align="center">No clue? No problem. Just install noclue by ignition.</h3>
+
 <p align="center"><strong>Short, calm answers for your Google Meet and Microsoft Teams calls, based on your own facts.</strong></p>
 
 <p align="center">Developed by <a href="https://ignition.sk">ignition.sk</a></p>
