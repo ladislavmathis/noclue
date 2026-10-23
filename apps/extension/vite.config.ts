@@ -29,15 +29,18 @@ export default defineConfig({
         setup: resolve(root, 'setup.html'),
         offscreen: resolve(root, 'offscreen.html'),
         background: resolve(root, 'src/background/index.ts'),
+        shareObserver: resolve(root, 'src/background/share-observer.ts'),
         pcm: resolve(root, 'src/audio/pcm-worklet.ts'),
       },
       output: {
         entryFileNames: (chunk) =>
           chunk.name === 'background'
             ? 'background.js'
-            : chunk.name === 'pcm'
-              ? 'pcm-worklet.js'
-              : 'assets/[name]-[hash].js',
+            : chunk.name === 'shareObserver'
+              ? 'share-observer.js'
+              : chunk.name === 'pcm'
+                ? 'pcm-worklet.js'
+                : 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
       },
     },

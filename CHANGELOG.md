@@ -13,10 +13,25 @@ of this file is in [docs/sk/CHANGELOG.md](docs/sk/CHANGELOG.md).
 
 ### Changed
 
+- The share observer starts when a Meet or Teams page loads and replays the share state when
+  the cue is opened or reopened. Tabs opened before the update must be reloaded; without the
+  observer the cue does not show. Detection is best effort and does not cover shares started
+  from other applications.
+- Unverified previews are off by default. An explicit user choice is kept; the guide and the
+  public texts explain the limits of the AI check.
+- Stop also clears the in-memory test recording. Export before stopping; files already
+  downloaded stay with the user.
+- The website links to the GitHub beta download with instructions. The release documentation
+  matches the public repository and the release workflow requires the browser tests before
+  publishing.
+- The diagnostics console no longer stores free text from the AI check. The secret scan also
+  catches further token types, nested `.env` files and keys placed after test values.
 - Repository cleanup for the public release: English changelog, full code of conduct,
-  pinned GitHub Actions, Dependabot, ESLint, complete third-party notices.
+  pinned GitHub Actions, Dependabot, ESLint, complete third-party notices. The public material
+  contains only noclue; the unrelated brand catalogue and pre-release internal notes are gone.
 - The cue window only accepts its own commands from the meeting page; the full transcript is
   never sent into the meeting tab.
+- Vitest updated to 4.1.12 for vulnerability fixes in development dependencies.
 
 ### Fixed
 

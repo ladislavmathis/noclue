@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { MeetingSession } from '../packages/core/src/sessions/session';
 import { ProviderError, type Recommend } from '../packages/core/src/recommendations/provider';
-import { LIMITS, type Decision, type ServerEvent } from '@noclue/shared';
+import {
+  LIMITS,
+  defaultPreferences,
+  type Project,
+  type Decision,
+  type ServerEvent,
+} from '@noclue/shared';
 const project = {
   name: 'Fictional test',
   role: 'Lead',
@@ -21,8 +27,12 @@ const decision: Decision = {
   missingInformation: [],
 };
 let events: ServerEvent[], sessions: MeetingSession[];
-function session(recommend: Recommend = async () => decision, mic = true) {
-  const s = new MeetingSession('test', project, mic, recommend, (e) => events.push(e));
+function session(
+  recommend: Recommend = async () => decision,
+  mic = true,
+  inputProject: Project = project,
+) {
+  const s = new MeetingSession('test', inputProject, mic, recommend, (e) => events.push(e));
   sessions.push(s);
   return s;
 }
@@ -637,6 +647,8 @@ it('forwards an unverified preview for the current manual attempt before the che
         input.onPreview?.({ ...decision, suggestedResponse: 'Draft wording.' });
         resolve = r;
       }),
+    true,
+    { ...project, preferences: { ...defaultPreferences, previewUnverified: true } },
   );
   s.transcript(segment('a'));
   s.answer();
@@ -678,11 +690,38 @@ it('does not preview when the user turned previews off', async () => {
   expect(count('recommendation.preview')).toBe(0);
   expect(count('recommendation.ready')).toBe(1);
 });
+it.each([undefined, defaultPreferences])(
+  'waits for review by default (preferences: %j)',
+  async (preferences) => {
+    let finish!: (d: Decision) => void;
+    const s = session(
+      (input) => {
+        expect(input.onPreview).toBeUndefined();
+        return new Promise((resolve) => {
+          finish = resolve;
+        });
+      },
+      true,
+      { ...project, preferences },
+    );
+    s.transcript(segment());
+    s.answer();
+    expect(count('recommendation.preview')).toBe(0);
+    expect(count('recommendation.ready')).toBe(0);
+    finish(decision);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(count('recommendation.ready')).toBe(1);
+  },
+);
 it('does not preview a speculative automatic draft while the speaker is still talking', async () => {
-  const s = session(async (input) => {
-    input.onPreview?.(decision);
-    return decision;
-  });
+  const s = session(
+    async (input) => {
+      input.onPreview?.(decision);
+      return decision;
+    },
+    true,
+    { ...project, preferences: { ...defaultPreferences, previewUnverified: true } },
+  );
   s.meetingSpeech(true, Date.now());
   s.transcript(segment('a', false));
   await vi.advanceTimersByTimeAsync(300);

@@ -61,16 +61,15 @@ function debugEvent(event: ServerEvent) {
       rev: e.preview.revision,
     });
   if (e.segment) Object.assign(fields, { seg: short(e.segment.id), final: e.segment.final });
-  // Test-mode telemetry reasons can carry review text; keep only short code-like reasons.
+  // Free-form reasons can contain meeting or project text, even when short.
   if (e.event)
     Object.assign(fields, {
       kind: e.event.kind,
       req: short(e.event.requestId),
-      reason: /^[\w .'-]{1,60}$/.test(e.event.reason ?? '') ? e.event.reason : undefined,
     });
   for (const k of ['requestId', 'questionId'] as const)
     if (e[k]) fields[k === 'requestId' ? 'req' : 'q'] = short(e[k]);
-  for (const k of ['revision', 'mode', 'reason', 'code'])
+  for (const k of ['revision', 'mode', 'code'])
     if (e[k] !== undefined) fields[k === 'revision' ? 'rev' : k] = e[k];
   console.log(new Date().toISOString().slice(11, 23), e.type, JSON.stringify(fields));
 }

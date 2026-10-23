@@ -79,7 +79,7 @@ export function ResponseControls({
       <label className="checkbox">
         <input
           type="checkbox"
-          checked={value.previewUnverified ?? true}
+          checked={value.previewUnverified ?? false}
           onChange={(e) => update({ previewUnverified: e.target.checked })}
         />
         Show first draft while facts are checked

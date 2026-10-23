@@ -121,7 +121,7 @@ function stop(error?: string) {
       sessionId: state.sessionId ?? '',
       reason: error,
     });
-  recorder.stop(monotonicEpoch());
+  recorder.stop();
   if (ready) message('session.stop');
   teardown();
   state = {

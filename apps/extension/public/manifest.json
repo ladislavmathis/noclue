@@ -15,6 +15,20 @@
   },
   "permissions": ["tabCapture", "offscreen", "sidePanel", "storage", "activeTab", "scripting"],
   "host_permissions": ["https://api.openai.com/*", "https://api.anthropic.com/*"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://meet.google.com/*",
+        "https://*.teams.microsoft.com/*",
+        "https://teams.microsoft.com/*",
+        "https://teams.live.com/*",
+        "https://teams.cloud.microsoft/*"
+      ],
+      "js": ["share-observer.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
   "background": {
     "service_worker": "background.js",
     "type": "module"

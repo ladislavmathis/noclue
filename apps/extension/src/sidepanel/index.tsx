@@ -467,7 +467,7 @@ function App() {
             disabled={state.active}
             onChange={(e) => setSettings({ ...settings, testMode: e.target.checked })}
           />{' '}
-          Test mode · questions and answers stay in memory until export
+          Test mode · export before Stop; Stop clears the recording
         </label>
         {!!state.testLogCount && (
           <>
@@ -526,8 +526,7 @@ function App() {
             {preview.responseType === 'draft' && <p className="missing">Draft · adapt it to you</p>}
             <p className="response">{preview.suggestedResponse}</p>
             <p className="coaching">
-              You can start speaking. Wait for the checked answer before quoting names, numbers or
-              commitments.
+              Unverified text may be wrong. Wait for the checked answer before using it.
             </p>
           </article>
         )}

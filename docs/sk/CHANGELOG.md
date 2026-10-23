@@ -9,6 +9,28 @@ musia mať rovnakú hodnotu (stráži to `tests/version.test.ts`).
 Číslovanie: **MAJOR.MINOR.PATCH** — PATCH pre opravy, MINOR pre nové funkcie, MAJOR pre
 nekompatibilné zmeny. Pri každej verzii pribudne záznam sem a git tag `vX.Y.Z`.
 
+## Unreleased
+
+- Verejné podklady obsahujú iba noclue; odstránený je nesúvisiaci katalóg značiek a interné
+  poznámky spred prvej verejnej verzie.
+- Cue sleduje zdieľanie od načítania stránky Meet/Teams a obnoví jeho stav pri otvorení alebo
+  opätovnom otvorení. Karty otvorené pred aktualizáciou treba obnoviť; bez detekcie sa cue
+  nezobrazí. Detekcia je best effort a nevzťahuje sa na zdieľanie z iných aplikácií.
+- Neoverené náhľady sú predvolene vypnuté. Výslovná voľba používateľa zostáva zachovaná;
+  pokyny aj verejné texty vysvetľujú limity AI kontroly.
+- Stop vymaže aj testový záznam v pamäti. Export treba spraviť pred zastavením; už stiahnuté
+  súbory zostávajú používateľovi.
+- Web odkazuje na GitHub beta download s návodom. Release dokumentácia zodpovedá verejnému
+  repozitáru a release workflow vyžaduje browser testy pred publikovaním.
+- Diagnostická konzola neukladá voľný text z AI kontroly. Kontrola secretov zachytáva aj
+  ďalšie typy tokenov, vnorené `.env` súbory a kľúče za testovacími hodnotami.
+- Vitest aktualizovaný na 4.1.12 kvôli oprave zraniteľností vo vývojových závislostiach.
+- Upratanie repozitára pred verejným vydaním: anglický changelog, úplný kódex správania,
+  pripnuté GitHub Actions, Dependabot, ESLint, úplné zoznamy tretích strán.
+- Cue okno prijíma zo stránky meetingu len vlastné príkazy; prepis sa do karty meetingu nikdy
+  neposiela.
+- Oprava: cue ostávalo viditeľné pri zdieľaní celej obrazovky po Pop out alebo Back.
+
 ## 0.5.0 — 20. 10. 2026
 
 - **Jazyk meetingu:** angličtina, slovenčina, čeština, nemčina alebo Automaticky. Nastavuje sa v

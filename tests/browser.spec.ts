@@ -1,4 +1,4 @@
-import { isolatedExtension } from './helpers/extension';
+import { isolatedExtension, mountTestCue } from './helpers/extension';
 import { test, expect, chromium, type BrowserContext } from '@playwright/test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -301,11 +301,10 @@ test('offscreen session survives panel closure, supports manual mode and clears 
 });
 
 test('keeps the last answer as the cue through a new question or retry until a newer draft replaces it', async () => {
-  const { mountCue } = await import('../apps/extension/src/background/overlay');
   const page = await context.newPage();
   try {
     await page.goto(`${origin}/sidepanel.html`);
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     const state = {
       ...initialState(),
       active: true,
@@ -383,11 +382,10 @@ test('keeps the last answer as the cue through a new question or retry until a n
 });
 
 test('lists older answers under the newest cue and keeps them after Dismiss', async () => {
-  const { mountCue } = await import('../apps/extension/src/background/overlay');
   const page = await context.newPage();
   try {
     await page.goto(`${origin}/sidepanel.html`);
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     const suggestion = (n: number, question: string, suggestedResponse: string) => ({
       action: 'suggest' as const,
       responseType: 'answer' as const,
@@ -459,11 +457,10 @@ test('lists older answers under the newest cue and keeps them after Dismiss', as
 });
 
 test('shows an unverified preview as a marked draft in panel and cue, then replaces it with the checked answer', async () => {
-  const { mountCue } = await import('../apps/extension/src/background/overlay');
   const page = await context.newPage();
   try {
     await page.goto(`${origin}/sidepanel.html`);
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     const question = {
       id: 'q1',
       revision: 1,
@@ -546,7 +543,6 @@ test('shows an unverified preview as a marked draft in panel and cue, then repla
 });
 
 test('cue hides itself while the page shares a tab or the screen, and the share hook only observes', async () => {
-  const { mountCue } = await import('../apps/extension/src/background/overlay');
   const { hookDisplayMedia } = await import('../apps/extension/src/background/share-hook');
   const page = await context.newPage();
   try {
@@ -570,7 +566,7 @@ test('cue hides itself while the page shares a tab or the screen, and the share 
     const wrapped = await page.evaluate(() => String(navigator.mediaDevices.getDisplayMedia));
     await page.evaluate(hookDisplayMedia);
     expect(await page.evaluate(() => String(navigator.mediaDevices.getDisplayMedia))).toBe(wrapped);
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     const host = page.locator('#noclue-cue');
     await expect(host).toBeVisible();
     await expect(host.locator('.privacy')).toContainText('Pop out');
@@ -607,12 +603,11 @@ test('cue hides itself while the page shares a tab or the screen, and the share 
 });
 
 test('cue pops out into a Picture-in-Picture window that only a whole-screen share hides', async () => {
-  const { mountCue } = await import('../apps/extension/src/background/overlay');
   const page = await context.newPage();
   try {
     await page.goto(`${origin}/sidepanel.html`);
     await page.evaluate(() => chrome.storage.local.remove('cueLayout'));
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     const share = (id: number, active: boolean, surface: string) =>
       page.evaluate(
         (detail) =>
@@ -628,7 +623,7 @@ test('cue pops out into a Picture-in-Picture window that only a whole-screen sha
     const host = pip.locator('#noclue-cue');
     await expect(host).toHaveCount(1);
     // Showing the cue again focuses the open window instead of creating a second cue.
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     await expect(page.locator('#noclue-cue')).toHaveCount(0);
     // Tab and window shares do not capture the separate window.
     await share(1, true, 'browser');
@@ -651,9 +646,88 @@ test('cue pops out into a Picture-in-Picture window that only a whole-screen sha
     ).toBe(true);
     // The next cue highlights Pop out, since Chrome needs a click to open the window.
     await page.locator('#noclue-cue').getByRole('button', { name: 'Hide cue' }).click();
-    await page.evaluate(mountCue);
+    await mountTestCue(page);
     await expect(page.locator('#noclue-cue #pop')).toHaveClass(/suggest/);
   } finally {
     await page.close();
+  }
+});
+
+test('cue restores an active screen share when opened or reopened and resumes after sharing ends', async () => {
+  const { hookDisplayMedia } = await import('../apps/extension/src/background/share-hook');
+  const { mountCue } = await import('../apps/extension/src/background/overlay');
+  const page = await context.newPage();
+  try {
+    await page.goto(`${origin}/sidepanel.html`);
+    await page.evaluate(() => {
+      navigator.mediaDevices.getDisplayMedia = async () => {
+        const stream = document.createElement('canvas').captureStream();
+        const track = stream.getVideoTracks()[0];
+        track.getSettings = () => ({ displaySurface: 'monitor' });
+        (window as any).sharedTrack = track;
+        return stream;
+      };
+    });
+    await page.evaluate(hookDisplayMedia);
+    // Start before any cue exists; the observer must retain and replay this state.
+    await page.evaluate(async () => {
+      await navigator.mediaDevices.getDisplayMedia({ video: true });
+    });
+    await page.evaluate(mountCue);
+    await expect(page.locator('#noclue-cue')).toHaveCSS('visibility', 'hidden');
+    // Destroy the hidden component, then open it again during the same share.
+    await page.evaluate(() =>
+      (
+        document
+          .getElementById('noclue-cue')!
+          .shadowRoot!.querySelector('#close') as HTMLButtonElement
+      ).click(),
+    );
+    await page.evaluate(mountCue);
+    await expect(page.locator('#noclue-cue')).toHaveCSS('visibility', 'hidden');
+    await page.evaluate(() => (window as any).sharedTrack.stop());
+    await expect(page.locator('#noclue-cue')).toHaveCSS('visibility', 'visible');
+    await page.locator('#noclue-cue #close').click();
+    await page.evaluate(mountCue);
+    await expect(page.locator('#noclue-cue')).toHaveCSS('visibility', 'visible');
+  } finally {
+    await page.close();
+  }
+});
+
+test('cue refuses to expose content on a tab without the share observer', async () => {
+  const { mountCue } = await import('../apps/extension/src/background/overlay');
+  const page = await context.newPage();
+  try {
+    await page.goto(`${origin}/sidepanel.html`);
+    await expect(page.evaluate(mountCue)).rejects.toThrow('Reload your meeting tab');
+    await expect(page.locator('#noclue-cue')).toHaveCount(0);
+  } finally {
+    await page.close();
+  }
+});
+
+test('the packaged share observer runs before page scripts on Meet and Teams', async () => {
+  for (const url of [
+    'https://meet.google.com/noclue-test',
+    'https://teams.microsoft.com/noclue-test',
+  ]) {
+    const page = await context.newPage();
+    try {
+      await page.route(url, (route) =>
+        route.fulfill({
+          contentType: 'text/html',
+          body: `<!doctype html><script>
+        window.shareSnapshot = null;
+        document.addEventListener('noclue:share-state', event => { window.shareSnapshot = JSON.parse(event.detail); });
+        document.dispatchEvent(new CustomEvent('noclue:share-query'));
+      </script>`,
+        }),
+      );
+      await page.goto(url);
+      expect(await page.evaluate(() => (window as any).shareSnapshot)).toEqual([]);
+    } finally {
+      await page.close();
+    }
   }
 });

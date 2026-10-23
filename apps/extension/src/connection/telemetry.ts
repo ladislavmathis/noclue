@@ -21,8 +21,8 @@ export class SessionRecorder {
     this.chars += size;
     this.log.events.push(event);
   }
-  stop(at: number) {
-    if (this.log) this.log.endedAt = at;
+  stop() {
+    this.clear();
   }
   clear() {
     this.diagnostics.length = 0;

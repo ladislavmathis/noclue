@@ -118,7 +118,7 @@ export const defaultPreferences = {
   length: 'standard',
   strictContext: false,
   silenceMs: 700,
-  previewUnverified: true,
+  previewUnverified: false,
   language: 'en',
 } as const;
 /** Meeting languages noclue transcribes and answers in. 'auto' answers in the question's language. */

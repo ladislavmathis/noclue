@@ -35,23 +35,24 @@ provider keeps no data. Check your provider account's data retention settings.
 - It does not sell, share or transfer data to anyone, and uses no data for advertising or
   creditworthiness.
 - It does not collect analytics, crash reports or usage statistics.
-- It does not read web pages other than the meeting tab you start it on, where it shows the
-  optional cue window.
+- On supported Meet and Teams pages, a small observer starts when the page loads. It observes
+  screen-share start/end and the surface type (tab, window or screen), so the optional cue can
+  hide even when sharing started before you opened it. It does not read meeting content, start
+  capture, or send this information anywhere.
 
-## The cue window in the meeting page
-
-When you choose **Show cue window**, noclue places the cue in the meeting tab and adds a small
-read-only observer to that page. The observer only notices when the meeting page starts or
-stops a screen share, so the cue can hide itself. It does not record, change or send anything;
-the page receives its own share stream unchanged. The cue in the page receives only the current
-answer, never the transcript. The observer is best effort: the meeting page could see it or
-bypass it, so always check what is on your shared screen.
+The optional in-page cue puts the displayed question and answer into the meeting page's DOM,
+where that page's scripts can read them. The cue receives only the current answer, never the
+transcript. Its pop-out uses the same page context. Use the
+extension side panel for sensitive information. Screen-share detection is best effort; shares
+started outside the meeting page are not detected. A whole-screen share can show the side panel.
 
 ## Test mode
 
 If you turn on test mode, questions, answers and timing are kept in memory so you can export
-them as a JSON file. Nothing is exported automatically. Stop, Clear test or closing the
-extension removes the recording.
+them as a JSON file. Nothing is exported automatically. Export before pressing Stop if you
+want to keep a copy. Stop and Clear test remove the in-memory recording, including on an error
+that stops listening. Closing only the side panel does not stop listening or clear the recording.
+Previously downloaded exports remain on your device until you delete them.
 
 ## Your choices
 

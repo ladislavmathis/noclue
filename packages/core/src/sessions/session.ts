@@ -613,7 +613,7 @@ export class MeetingSession {
               }),
             level: 'QUICK',
             onPreview:
-              (this.project.preferences?.previewUnverified ?? true)
+              (this.project.preferences?.previewUnverified ?? false)
                 ? (draft) => this.preview(attempt, draft)
                 : undefined,
           },

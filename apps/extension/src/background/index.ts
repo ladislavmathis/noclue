@@ -5,7 +5,6 @@ import {
   type PanelState,
 } from '@noclue/shared';
 import { mountCue } from './overlay';
-import { hookDisplayMedia } from './share-hook';
 let creating: Promise<void> | undefined;
 const fromExtensionPage = (sender: chrome.runtime.MessageSender) =>
   sender.url?.startsWith(chrome.runtime.getURL('')) ?? false;
@@ -63,11 +62,8 @@ chrome.runtime.onMessage.addListener((message: ExtensionCommand, sender, respond
         if (current?.active && current.tabId !== tab.id)
           throw new Error('Open the meeting tab currently being captured to show its cue.');
       }
-      // Observe screen shares started from the meeting page so the cue can hide itself.
-      // Best effort: a page that blocks it still gets the cue and its warning text.
-      await chrome.scripting
-        .executeScript({ target: { tabId: tab.id }, world: 'MAIN', func: hookDisplayMedia })
-        .catch(() => {});
+      // The document_start observer must already be present. mountCue refuses to show
+      // content on an old tab that has not been reloaded since installation/update.
       await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: mountCue });
       return { ok: true };
     }

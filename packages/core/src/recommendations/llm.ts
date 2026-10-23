@@ -35,7 +35,8 @@ function parseJson(text: string): StructuredResult {
   }
 }
 
-/** OpenAI Responses API with strict JSON schema output. `store:false` keeps no server copy. */
+/** OpenAI Responses API with strict JSON schema output. `store:false` opts out of response storage;
+ * provider abuse-monitoring and account retention policies still apply. */
 export function openAIModel(apiKey: string, model: string): StructuredModel {
   // The key is the user's own and stays in their browser; requests go straight to OpenAI.
   const client = new OpenAI({

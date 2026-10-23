@@ -1,4 +1,4 @@
-import { isolatedExtension } from './helpers/extension';
+import { isolatedExtension, mountTestCue } from './helpers/extension';
 import { APP_VERSION, PROTOCOL_VERSION } from '../packages/shared/src/index';
 import { test, expect, chromium, type BrowserContext, type Page } from '@playwright/test';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -52,6 +52,8 @@ test.afterEach(async () => {
 });
 test('response controls persist and keep microphone privacy unchanged', async () => {
   const page = await panel();
+  await expect(page.getByLabel('Show first draft while facts are checked')).not.toBeChecked();
+  await page.getByLabel('Show first draft while facts are checked').check();
   await page.getByLabel('Response style', { exact: true }).selectOption('executive');
   await page.getByLabel('Meeting language', { exact: true }).selectOption('sk');
   await page.getByLabel('Response length', { exact: true }).selectOption('detailed');
@@ -60,6 +62,7 @@ test('response controls persist and keep microphone privacy unchanged', async ()
   await page.getByRole('button', { name: 'Save settings', exact: true }).click();
   await page.reload();
   await page.getByRole('button', { name: /^Settings/ }).click();
+  await expect(page.getByLabel('Show first draft while facts are checked')).toBeChecked();
   await expect(page.getByLabel('Response style', { exact: true })).toHaveValue('executive');
   await expect(page.getByLabel('Meeting language', { exact: true })).toHaveValue('sk');
   expect((await stored(page)).project.preferences.language).toBe('sk');
@@ -393,7 +396,6 @@ test('practice question renders grounded evidence, clears when edited, and never
 
 test('personal profile persists without replacing the project and drafts are labelled everywhere', async () => {
   const { initialState, factsForProject } = await import('@noclue/shared');
-  const { mountCue } = await import('../apps/extension/src/background/overlay');
   const page = await panel();
   await expect(page.getByLabel('About me')).toHaveValue('');
   await page.getByLabel('About me').fill('My name is Alex. I enjoy simplifying difficult ideas.');
@@ -450,7 +452,7 @@ test('personal profile persists without replacing the project and drafts are lab
   );
   await expect(page.locator('.suggestion')).toContainText('Draft · adapt it to you');
   await expect(page.locator('.suggestion .response')).toHaveText(decision.suggestedResponse);
-  await page.evaluate(mountCue);
+  await mountTestCue(page);
   await worker.evaluate((state) => chrome.runtime.sendMessage({ target: 'cue', state }), state);
   await expect(page.locator('#noclue-cue .draft')).toBeVisible();
   await expect(page.locator('#noclue-cue .answer')).toHaveText(decision.suggestedResponse);

@@ -49,6 +49,43 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 const sessionId = '00000000-0000-4000-8000-000000000001';
 
 describe('in-extension hub', () => {
+  it('keeps free-form audit reasons and meeting text out of the debug console', async () => {
+    const privateReason = 'Synthetic private project note';
+    const meetingText = 'What is the confidential pilot budget?';
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const h = harness({
+      debug: true,
+      recommend: vi.fn(async (input) => {
+        input.audit?.({ kind: 'review.retry', at: Date.now(), reason: privateReason });
+        return skip;
+      }),
+    });
+    try {
+      h.authenticate();
+      h.json({ type: 'session.start', sessionId, project, micAvailable: false, testMode: true });
+      await flush();
+      const onSegment = vi.mocked(h.config.transcriber).mock.calls[0][1];
+      onSegment({
+        id: 'fixture-segment',
+        sequence: 0,
+        at: Date.now(),
+        text: meetingText,
+        final: true,
+      });
+      h.json({ type: 'recommendation.request', sessionId });
+      await vi.waitFor(() => expect(h.config.recommend).toHaveBeenCalled());
+      // The explicit test-mode export keeps its diagnostic detail; the console does not.
+      expect(JSON.stringify(h.events)).toContain(privateReason);
+      const output = JSON.stringify(log.mock.calls);
+      expect(output).toContain('review.retry');
+      expect(output).not.toContain(privateReason);
+      expect(output).not.toContain(meetingText);
+      expect(output).not.toContain(project.context);
+    } finally {
+      h.connection.closed();
+      log.mockRestore();
+    }
+  });
   it('needs no pairing token and rejects audio before authentication', () => {
     const h = harness();
     h.connection.receive(new Uint8Array(480));

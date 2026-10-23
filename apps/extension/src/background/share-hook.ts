@@ -1,5 +1,5 @@
 /**
- * Runs in the meeting page's MAIN world (chrome.scripting, world: 'MAIN') so it sees the same
+ * Runs at document_start in the meeting page's MAIN world so it sees the same
  * navigator.mediaDevices that Google Meet and Teams call when the user presents. It only
  * observes: the page gets the identical stream back, nothing is recorded or sent anywhere.
  * Each share start and end is announced as a 'noclue:share' DOM event carrying a JSON string
@@ -12,9 +12,16 @@ export function hookDisplayMedia() {
   if (page.__noclueShareHook || typeof media?.getDisplayMedia !== 'function') return;
   page.__noclueShareHook = true;
   const original = media.getDisplayMedia.bind(media);
+  const active = new Map<number, string>();
   let next = 0;
   const notify = (detail: { id: number; active: boolean; surface: string }) =>
     document.dispatchEvent(new CustomEvent('noclue:share', { detail: JSON.stringify(detail) }));
+  // The observer outlives the cue. Replay active shares whenever a cue is opened again.
+  document.addEventListener('noclue:share-query', () => {
+    document.dispatchEvent(
+      new CustomEvent('noclue:share-state', { detail: JSON.stringify([...active]) }),
+    );
+  });
   media.getDisplayMedia = async (...args: Parameters<MediaDevices['getDisplayMedia']>) => {
     const stream = await original(...args);
     const track = stream.getVideoTracks()[0];
@@ -29,8 +36,10 @@ export function hookDisplayMedia() {
     const end = () => {
       if (ended) return;
       ended = true;
+      active.delete(id);
       notify({ id, active: false, surface });
     };
+    active.set(id, surface);
     notify({ id, active: true, surface });
     // 'ended' fires when the user stops sharing from Chrome's bar; stop() is how the meeting
     // app ends it itself, and fires no event.

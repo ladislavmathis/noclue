@@ -25,7 +25,13 @@ class FakeWebSocket {
 }
 vi.stubGlobal('WebSocket', FakeWebSocket);
 import { OpenAITranscriber } from '../packages/core/src/realtime/transcriber';
-const project = { name: 'Test', role: '', goal: '', context: 'Test context', keywords: ['ORBIT'] };
+const project = {
+  name: 'Test',
+  role: '',
+  goal: '',
+  context: 'Test context',
+  keywords: ['NOCLUE_FIXTURE'],
+};
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 const event = (data: unknown) => state.socket.onmessage?.({ data: JSON.stringify(data) });
