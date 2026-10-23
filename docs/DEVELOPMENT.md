@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js 22 or newer (`nvm use` reads `.nvmrc`).
+- Node.js 22.13 or newer (`nvm use` reads `.nvmrc`). ESLint 10 needs 22.13+ and does not support Node 23.
 - Current desktop Chrome or Chromium.
 - For browser tests once: `npx playwright install chromium`.
 
