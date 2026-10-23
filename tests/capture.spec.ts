@@ -136,7 +136,7 @@ test('production Chrome tabCapture → local VAD → PCM → hub → recommendat
     });
     await app.listen({ host: '127.0.0.1', port: testPort });
     const speech = (await readFile('tests/fixtures/meeting-speech.wav')).toString('base64');
-    await context.route('https://meet.google.com/ignition-test', (route) =>
+    await context.route('https://meet.google.com/noclue-test', (route) =>
       route.fulfill({
         contentType: 'text/html',
         body: `<!doctype html><title>noclue synthetic meeting</title><h1>Local speech fixture — not a Google Meet call</h1><button id="play">Play participant speech</button><audio id="speech" src="data:audio/wav;base64,${speech}"></audio><script>const audio=document.querySelector('audio');document.querySelector('button').onclick=async()=>{const ac=new AudioContext();globalThis.fixtureAudio=ac;await ac.resume();const decoded=await ac.decodeAudioData(await (await fetch(audio.src)).arrayBuffer());const buffer=ac.createBuffer(decoded.numberOfChannels,decoded.length+ac.sampleRate,ac.sampleRate);for(let c=0;c<decoded.numberOfChannels;c++)buffer.copyToChannel(decoded.getChannelData(c),c);const source=ac.createBufferSource();source.buffer=buffer;source.loop=true;source.connect(ac.destination);source.start();};</script>`,
@@ -151,7 +151,7 @@ test('production Chrome tabCapture → local VAD → PCM → hub → recommendat
       answerModel: '',
       anthropicKey: '',
       consentAt: 1,
-      microphoneId: 'ignition-test-no-physical-microphone',
+      microphoneId: 'noclue-test-no-physical-microphone',
       project: {
         name: 'Synthetic capture acceptance',
         role: 'Project lead',
@@ -162,7 +162,7 @@ test('production Chrome tabCapture → local VAD → PCM → hub → recommendat
     };
     await panel.evaluate((settings) => chrome.storage.local.set({ settings }), settings);
     const meet = await context.newPage();
-    await meet.goto('https://meet.google.com/ignition-test');
+    await meet.goto('https://meet.google.com/noclue-test');
     await meet.getByRole('button', { name: 'Play participant speech' }).click();
     await meet.bringToFront();
     const browserCdp = await context.browser()!.newBrowserCDPSession();

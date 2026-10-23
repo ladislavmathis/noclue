@@ -7,16 +7,19 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       CWS_ENABLED: ${{ secrets.CWS_REFRESH_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run secrets:check
+      - run: npm run format:check
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - name: Check tag matches package version
@@ -33,7 +36,8 @@ jobs:
           CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
           CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
           CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+        # The CLI is a pinned devDependency, so the lockfile fixes the exact version that runs here.
         run: >
-          npx --yes chrome-webstore-upload-cli@3 upload --source release/noclue-*.zip
+          npx --no-install chrome-webstore-upload-cli upload --source release/noclue-*.zip
           --extension-id "$CWS_EXTENSION_ID" --client-id "$CWS_CLIENT_ID"
           --client-secret "$CWS_CLIENT_SECRET" --refresh-token "$CWS_REFRESH_TOKEN"

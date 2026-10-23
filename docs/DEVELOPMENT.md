@@ -18,7 +18,7 @@
 | `apps/extension/src/connection` | `LocalSocket` and transport selection, connection check, practice preview.                                                                                                |
 | `packages/core`                 | The meeting logic that used to be the local server: hub, session, question engine, transcriber, answer generation, evidence review, key test. Browser-neutral TypeScript. |
 | `packages/shared`               | Schemas, protocol types, settings, limits.                                                                                                                                |
-| `scripts`                       | Icon rendering, packaging, secret scan, public export, quality evaluation.                                                                                                |
+| `scripts`                       | Icon rendering, packaging, secret scan, quality evaluation.                                                                                                               |
 | `docs/brand`                    | Design manual handoff, tokens and logo renders.                                                                                                                           |
 | `store`                         | Chrome Web Store artwork and listing text.                                                                                                                                |
 

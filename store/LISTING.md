@@ -86,7 +86,7 @@ never to the developer):
 Certify: data is not sold, not used or transferred for purposes unrelated to the single purpose,
 and not used for creditworthiness or lending.
 
-Privacy policy URL: `https://<user>.github.io/<repo>/privacy.html` (from `docs/site`).
+Privacy policy URL: `https://ladislavmathis.github.io/noclue/privacy.html` (from `docs/site`).
 
 ## Notes for the reviewer
 

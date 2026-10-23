@@ -74,6 +74,7 @@ export default defineConfig({
             resolve(root, '../../node_modules/@anthropic-ai/sdk/LICENSE'),
           ],
           ['json-schema-to-ts', resolve(root, '../../node_modules/json-schema-to-ts/LICENSE')],
+          ['@opentelemetry/api', resolve(root, '../../node_modules/@opentelemetry/api/LICENSE')],
           ['Manrope font', resolve(root, 'public/fonts/OFL-Manrope.txt')],
           ['Anta font', resolve(root, 'public/fonts/OFL-Anta.txt')],
         ] as const;

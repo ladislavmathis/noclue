@@ -1,5 +1,5 @@
 // vad-web 0.0.31 retains full utterance audio for its onSpeechEnd callback.
-// Ignition only consumes activity, never that recording. Keep the last 64
+// noclue only consumes activity, never that recording. Keep the last 64
 // Silero v5 frames (~2 seconds, 128 KiB), preserving all detector counters.
 // This narrow adapter intentionally targets the pinned library version.
 // Its private integration is checked at startup and exercised against the

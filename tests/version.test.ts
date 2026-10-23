@@ -10,5 +10,6 @@ it('keeps one release version across package, manifest and UI', () => {
 });
 it('documents every release in the changelog', () => {
   const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
-  expect(changelog).toContain(`## ${APP_VERSION}`);
+  // Keep a Changelog headings: `## [0.5.0] - 2026-10-20`.
+  expect(changelog).toMatch(new RegExp(`^## \\[${APP_VERSION.replaceAll('.', '\\.')}\\]`, 'm'));
 });

@@ -8,17 +8,8 @@ coverage/
 *.log
 test-results/
 playwright-report/
-
 eval-results/
-
-ignition-connection.json
-
 soak-results/
-mic-test-results/
-local-data/
-voice-test-results/
-worker-test-results/
-transcript-test-results/
 
 # Release artefacts and test build
 release/

@@ -1,6 +1,7 @@
 {
   "name": "@noclue/extension",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite build --watch",
@@ -12,7 +13,6 @@
     "onnxruntime-web": "1.22.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zod": "^3.24.2",
     "@noclue/core": "*"
   }
 }

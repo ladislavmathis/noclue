@@ -3,7 +3,7 @@ import { APP_VERSION, PROTOCOL_VERSION } from '../packages/shared/src/index';
 import { test, expect, chromium, type BrowserContext, type Page } from '@playwright/test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 let context: BrowserContext, profile: string, origin: string;
 const saved = {
   openaiKey: 'sk-test-user-journeys-not-a-real-key',
@@ -135,7 +135,8 @@ test('setup guide saves keys, microphone step and the data notice before Start',
 });
 test('imported UTF-8 project is a draft until Save and survives a reload after saving', async () => {
   const page = await panel();
-  const text = 'Overené fakty:\n\nPilot ešte neprebehol. Žiadne potvrdené výsledky.';
+  // Non-ASCII input checks that UTF-8 survives import, save and reload.
+  const text = 'Overené fakty:\n\nŠtart projektu je v máji. Rozpočet ešte nie je potvrdený.';
   await page
     .getByLabel('Import .txt or .md')
     .setInputFiles({ name: 'project.md', mimeType: 'text/markdown', buffer: Buffer.from(text) });

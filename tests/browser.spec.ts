@@ -2,7 +2,7 @@ import { isolatedExtension } from './helpers/extension';
 import { test, expect, chromium, type BrowserContext } from '@playwright/test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 import { initialState } from '@noclue/shared';
 let context: BrowserContext, profile: string, origin: string;
 test.beforeAll(async () => {
@@ -124,7 +124,7 @@ test('executes the built PCM AudioWorklet inside extension CSP', async () => {
     await audio.resume();
     await audio.audioWorklet.addModule(chrome.runtime.getURL('pcm-worklet.js'));
     const oscillator = new OscillatorNode(audio, { frequency: 440 }),
-      worklet = new AudioWorkletNode(audio, 'ignition-pcm'),
+      worklet = new AudioWorkletNode(audio, 'noclue-pcm'),
       gain = audio.createGain();
     gain.gain.value = 0;
     oscillator.connect(worklet).connect(gain).connect(audio.destination);

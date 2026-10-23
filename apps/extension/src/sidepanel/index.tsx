@@ -4,7 +4,6 @@ import {
   SettingsSchema,
   ProjectSchema,
   aiSetupProblem,
-  emptyProject,
   initialState,
   visibleCue,
   type PanelState,
@@ -475,7 +474,9 @@ function App() {
             <button onClick={() => void exportTest()}>Export test JSON</button>
             <button
               onClick={() =>
-                void chrome.runtime.sendMessage({ target: 'offscreen', type: 'test.clear' })
+                void chrome.runtime
+                  .sendMessage({ target: 'offscreen', type: 'test.clear' })
+                  .catch(() => {})
               }
             >
               Clear test
@@ -589,12 +590,14 @@ function App() {
                     key={feedback}
                     aria-label={feedback}
                     onClick={() => {
-                      void chrome.runtime.sendMessage({
-                        target: 'offscreen',
-                        type: 'feedback',
-                        requestId: suggestion.requestId,
-                        feedback,
-                      });
+                      void chrome.runtime
+                        .sendMessage({
+                          target: 'offscreen',
+                          type: 'feedback',
+                          requestId: suggestion.requestId,
+                          feedback,
+                        })
+                        .catch(() => {});
                       setNotice(
                         state.testMode
                           ? 'Feedback recorded for export.'
@@ -620,11 +623,13 @@ function App() {
                 <button
                   className="text-button"
                   onClick={() => {
-                    void chrome.runtime.sendMessage({
-                      target: 'offscreen',
-                      type: 'dismiss',
-                      requestId: suggestion.requestId,
-                    });
+                    void chrome.runtime
+                      .sendMessage({
+                        target: 'offscreen',
+                        type: 'dismiss',
+                        requestId: suggestion.requestId,
+                      })
+                      .catch(() => {});
                   }}
                 >
                   Dismiss

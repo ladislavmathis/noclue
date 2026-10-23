@@ -1,6 +1,6 @@
 # noclue privacy policy
 
-_Last updated: 20 October 2026. Applies to the noclue by ignition Chrome extension, version 0.4
+_Last updated: 23 October 2026. Applies to the noclue by ignition Chrome extension, version 0.4
 and later._
 
 noclue is a Chrome extension that helps you answer questions during online meetings. It has no
@@ -37,6 +37,15 @@ provider keeps no data. Check your provider account's data retention settings.
 - It does not collect analytics, crash reports or usage statistics.
 - It does not read web pages other than the meeting tab you start it on, where it shows the
   optional cue window.
+
+## The cue window in the meeting page
+
+When you choose **Show cue window**, noclue places the cue in the meeting tab and adds a small
+read-only observer to that page. The observer only notices when the meeting page starts or
+stops a screen share, so the cue can hide itself. It does not record, change or send anything;
+the page receives its own share stream unchanged. The cue in the page receives only the current
+answer, never the transcript. The observer is best effort: the meeting page could see it or
+bypass it, so always check what is on your shared screen.
 
 ## Test mode
 

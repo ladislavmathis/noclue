@@ -4,7 +4,7 @@
 Brand identity for **noclue**, an app in the Ignition product family. Covers the logo lockup, app icon / favicon (question-mark glyph, replaces the Ignition rocket for this product), colors, typography, usage rules and tone of voice. Use it to set up the app's design tokens, icon assets and logo component.
 
 ## About the Design Files
-Files in this bundle are **design references created in HTML** – they show the intended look, not production code to copy. Recreate them in the target codebase's environment (React, Vue, SwiftUI, native…) using its patterns. If no environment exists yet, pick the most appropriate framework. The SVGs in `assets/` and `tokens.css` are production-ready and can be used directly.
+Files in this bundle are **design references created in HTML** – they show the intended look, not production code to copy. Recreate them in the target codebase's environment (React, Vue, SwiftUI, native…) using its patterns. If no environment exists yet, pick the most appropriate framework. The SVGs in `apps/extension/public/brand/` and `tokens.css` are production-ready and can be used directly.
 
 ## Fidelity
 **High-fidelity.** Colors, type, geometry and sizes are final.
@@ -87,12 +87,13 @@ Friendly and calm. Not knowing is normal – noclue never shames the user, it he
 Not applicable – brand manual only. App screens are not designed yet.
 
 ## Assets
-- `assets/noclue-icon.svg` – primary icon tile 512×512
-- `assets/noclue-icon-dark.svg` – dark icon tile 512×512
-- `assets/favicon.svg` – 32×32 favicon with small-size stroke
-- `assets/noclue-glyph.svg` – bare glyph, `currentColor`
-- Fonts: Anta, Manrope from Google Fonts
+- `apps/extension/public/brand/noclue-icon.svg` – primary icon tile 512×512
+- `apps/extension/public/brand/noclue-icon-dark.svg` – dark icon tile 512×512
+- `apps/extension/public/brand/favicon.svg` – 32×32 favicon with small-size stroke
+- `apps/extension/public/brand/noclue-glyph.svg` – bare glyph, `currentColor`
+- `lockup-light.png`, `lockup-dark.png` – rendered lockups (README, website)
+- Fonts: Anta, Manrope (bundled in `apps/extension/public/fonts`, SIL OFL)
 
 ## Files
-- `noclue Design Manual.dc.html` – full design manual (open in browser; needs `support.js` alongside)
-- `Ignition Logo.dc.html` – all Ignition-family logos incl. noclue lockup (`#lg-noclue`) and icon tiles (`#lg-noclue-icon`, `#lg-noclue-dark`)
+The interactive design manual and the Ignition logo family are kept outside this repository.
+This handoff and `tokens.css` are the complete reference for noclue.

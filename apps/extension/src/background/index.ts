@@ -7,6 +7,8 @@ import {
 import { mountCue } from './overlay';
 import { hookDisplayMedia } from './share-hook';
 let creating: Promise<void> | undefined;
+const fromExtensionPage = (sender: chrome.runtime.MessageSender) =>
+  sender.url?.startsWith(chrome.runtime.getURL('')) ?? false;
 async function offscreen() {
   if (await chrome.offscreen.hasDocument()) return;
   if (!creating)
@@ -36,7 +38,11 @@ chrome.action.onClicked.addListener((tab) => {
   if (tab.id) void chrome.sidePanel.open({ tabId: tab.id });
 });
 chrome.runtime.onMessage.addListener((message: ExtensionCommand, sender, respond) => {
-  if (sender.id !== chrome.runtime.id || message.target !== 'background') return;
+  // Only the extension's own pages may drive the service worker. The cue window runs as a
+  // content script in the meeting tab (sender.url is the meeting page) and talks to the
+  // offscreen page. The side panel also reports a tab, so the URL is the reliable test.
+  if (sender.id !== chrome.runtime.id || !fromExtensionPage(sender)) return;
+  if (message.target !== 'background') return;
   void (async () => {
     if (message.type === 'setup' || message.type === 'guide') {
       const step = message.type === 'setup' ? '#microphone' : '';
@@ -54,7 +60,7 @@ chrome.runtime.onMessage.addListener((message: ExtensionCommand, sender, respond
           target: 'offscreen',
           type: 'snapshot',
         })) as PanelState;
-        if (current.active && current.tabId !== tab.id)
+        if (current?.active && current.tabId !== tab.id)
           throw new Error('Open the meeting tab currently being captured to show its cue.');
       }
       // Observe screen shares started from the meeting page so the cue can hide itself.
@@ -121,7 +127,7 @@ async function stopForTab(tabId: number) {
     target: 'offscreen',
     type: 'snapshot',
   })) as PanelState;
-  if (state.tabId === tabId && state.active)
+  if (state?.tabId === tabId && state.active)
     await chrome.runtime.sendMessage({ target: 'offscreen', type: 'stop' });
 }
 chrome.tabs.onRemoved.addListener((id) => {

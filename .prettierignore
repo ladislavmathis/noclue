@@ -3,14 +3,7 @@ node_modules/
 package-lock.json
 test-results/
 eval-results/
-ignition-connection.json
-
 soak-results/
-mic-test-results/
-local-data/
-voice-test-results/
-worker-test-results/
-transcript-test-results/
 release/
 # Brand handoff files are kept exactly as delivered by the designer.
 docs/brand/
@@ -19,4 +12,3 @@ apps/extension/src/styles/brand-tokens.css
 docs/site/privacy.html
 # Fixtures are checksummed or compared byte for byte.
 tests/fixtures/
-Contexts/

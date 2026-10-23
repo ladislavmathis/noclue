@@ -80,7 +80,7 @@ Full policy: [PRIVACY.md](PRIVACY.md).
 - Meetings in English, Slovak, Czech and German, or Automatic, which answers in the language of
   each question. The interface and coaching are in English. Speaker names are not recognised.
 - Chrome desktop only. The Teams desktop app cannot be captured: open the meeting in Chrome.
-- Screen-share detection only sees shares started from the meeting page itself. A share started
+- Screen-share detection is best effort and only sees shares started from the meeting page itself. A share started
   from another app or from macOS or Windows is not detected, and a whole-screen share also shows
   the side panel.
 - noclue cannot see whether you are muted, whether a question was meant for you, or what you

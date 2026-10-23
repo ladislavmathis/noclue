@@ -4,9 +4,9 @@ import type { Settings } from '@noclue/shared';
 type Listener<E> = ((event: E) => void) | null;
 
 /**
- * An in-page stand-in for the WebSocket that used to reach the local backend on
- * 127.0.0.1:4317. The meeting logic now runs in this extension page and calls OpenAI or
- * Anthropic directly with the user's own key, so there is no server to start.
+ * An in-page stand-in for a WebSocket. The meeting logic (`@noclue/core`) runs in this
+ * extension page and calls OpenAI or Anthropic directly with the user's own key, so there is
+ * no server to start; the hub protocol is kept so the UI and tests speak one language.
  *
  * It keeps WebSocket semantics the UI code relies on: open, message and close are
  * delivered asynchronously and in order, messages are JSON text, and a close is final.
