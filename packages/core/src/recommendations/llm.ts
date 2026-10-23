@@ -73,12 +73,6 @@ export function openAIModel(apiKey: string, model: string): StructuredModel {
   };
 }
 
-export const ANTHROPIC_MODELS = [
-  'claude-opus-5-5',
-  'claude-sonnet-5-5',
-  'claude-haiku-5-5',
-] as const;
-export type AnthropicModel = (typeof ANTHROPIC_MODELS)[number];
 /** Server-side refusal fallback ("default" routing) is available for these models. */
 const FALLBACK_MODELS = new Set<string>(['claude-opus-5-5', 'claude-sonnet-5-5']);
 /**

@@ -41,7 +41,8 @@ provider keeps no data. Check your provider account's data retention settings.
   capture, or send this information anywhere.
 
 The optional in-page cue puts the displayed question and answer into the meeting page's DOM,
-where that page's scripts can read them. Its pop-out uses the same page context. Use the
+where that page's scripts can read them. The cue receives only the current answer, never the
+transcript. Its pop-out uses the same page context. Use the
 extension side panel for sensitive information. Screen-share detection is best effort; shares
 started outside the meeting page are not detected. A whole-screen share can show the side panel.
 

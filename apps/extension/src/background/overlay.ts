@@ -190,10 +190,12 @@ export async function mountCue() {
     const hide = cueState.pip
       ? surfaces.some((surface) => surface !== 'browser' && surface !== 'window')
       : surfaces.length > 0;
-    if (hide === shareHidden) return;
+    const changed = hide !== shareHidden;
     shareHidden = hide;
+    // Always re-apply: restore() and Pop out replace host.style.cssText, which drops visibility.
     host.style.visibility = hide ? 'hidden' : '';
     if (cueState.pip) cueState.pip.document.body.style.visibility = hide ? 'hidden' : '';
+    if (!changed) return;
     void chrome.runtime
       .sendMessage({ target: 'panel', type: 'cue.share', hidden: hide })
       .catch(() => {});
@@ -454,22 +456,22 @@ export async function mountCue() {
   el('#dismiss').onclick = () => {
     const cue = current?.suggestions[0];
     if (cue)
-      void chrome.runtime.sendMessage({
-        target: 'offscreen',
-        type: 'dismiss',
-        requestId: cue.requestId,
-      });
+      void chrome.runtime
+        .sendMessage({ target: 'offscreen', type: 'dismiss', requestId: cue.requestId })
+        .catch(() => {});
   };
   root.querySelectorAll<HTMLButtonElement>('[data-feedback]').forEach((button) => {
     button.onclick = () => {
       const cue = current?.suggestions[0];
       if (cue)
-        void chrome.runtime.sendMessage({
-          target: 'offscreen',
-          type: 'feedback',
-          requestId: cue.requestId,
-          feedback: button.dataset.feedback,
-        });
+        void chrome.runtime
+          .sendMessage({
+            target: 'offscreen',
+            type: 'feedback',
+            requestId: cue.requestId,
+            feedback: button.dataset.feedback,
+          })
+          .catch(() => {});
     };
   });
   const observer = new ResizeObserver(() => {

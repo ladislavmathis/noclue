@@ -13,7 +13,12 @@ export async function checkConnection(
   const problem = aiSetupProblem(settings);
   if (problem) return { ok: false, message: problem };
   // Test builds talk to a local fake hub; there is no real account to verify.
-  const keys = __TEST_HUB_URL__ ? [] : await verifyKeys(settings, signal).catch(() => []);
+  const keys = __TEST_HUB_URL__
+    ? []
+    : await verifyKeys(settings, signal).catch((error: unknown) => {
+        console.warn('[noclue] key check skipped', error);
+        return [];
+      });
   const failed = keys.find((k) => !k.ok);
   if (signal?.aborted) return { ok: false, message: 'Check cancelled.' };
   if (failed) return { ok: false, message: failed.message };

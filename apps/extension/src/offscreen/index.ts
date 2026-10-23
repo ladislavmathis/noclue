@@ -46,6 +46,7 @@ const short = (id?: string) => id?.slice(0, 8);
 let lastCueLog = '';
 /** Logs what the cue surfaces show after each meeting event: identities only, never text. */
 function debugCue(event: string, ids: Record<string, unknown>) {
+  if (!state.testMode) return;
   const { cue: shown, preview } = visibleCue(state);
   const cue = shown
     ? `answer ${short(shown.requestId)}`
@@ -237,7 +238,7 @@ function connect(expectedGeneration: number) {
         }, 30_000);
         break;
       case 'transcript.delta':
-      case 'transcript.final':
+      case 'transcript.final': {
         const history = appendTranscript(state.transcriptHistory ?? [], data.segment);
         state.transcriptHistory = history.segments;
         state.transcriptTruncated ||= history.truncated;
@@ -246,6 +247,7 @@ function connect(expectedGeneration: number) {
           data.segment,
         ]);
         break;
+      }
       case 'recommendation.started':
         if (data.mode === 'manual') manualRequestId = data.requestId;
         if (data.questionId !== state.question?.id || data.revision !== state.question?.revision)
@@ -430,7 +432,7 @@ async function start(command: Extract<ExtensionCommand, { streamId: string }>) {
         if (ready) message('audio.commit');
       },
     );
-    worklet = new AudioWorkletNode(ac, 'ignition-pcm');
+    worklet = new AudioWorkletNode(ac, 'noclue-pcm');
     worklet.port.onmessage = (event) => {
       if (ready) gate?.frame(event.data as ArrayBuffer);
     };
@@ -517,8 +519,22 @@ async function start(command: Extract<ExtensionCommand, { streamId: string }>) {
       );
   }
 }
+// The cue window is a content script in the meeting tab, so a compromised page could send
+// in its name. It may only read and act on the current cue, never start or export a session.
+const CUE_COMMANDS = new Set([
+  'snapshot',
+  'answer',
+  'stop',
+  'dismiss',
+  'feedback',
+  'answer.visible',
+]);
+const fromExtensionPage = (sender: chrome.runtime.MessageSender) =>
+  sender.url?.startsWith(chrome.runtime.getURL('')) ?? false;
 chrome.runtime.onMessage.addListener((command: ExtensionCommand, sender, respond) => {
   if (sender.id !== chrome.runtime.id || command.target !== 'offscreen') return;
+  const fromCue = !fromExtensionPage(sender);
+  if (fromCue && !CUE_COMMANDS.has(command.type)) return;
   if (command.type === 'test.export') {
     respond(recorder.log ?? null);
     return;
@@ -578,7 +594,8 @@ chrome.runtime.onMessage.addListener((command: ExtensionCommand, sender, respond
     return;
   }
   if (command.type === 'snapshot') {
-    respond(state);
+    // The meeting tab only ever receives the cue, never the transcript.
+    respond(fromCue ? { ...state, segments: [], transcriptHistory: [] } : state);
     return;
   }
   if (command.type === 'stop') {

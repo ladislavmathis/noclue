@@ -1,8 +1,7 @@
 # noclue brand in the product
 
-The design manual from the designer is in [docs/brand](brand/) (`HANDOFF.md`, `tokens.css`,
-the noclue manual HTML file and rendered lockups). These rules apply to everything in this
-repository.
+The designer's handoff is in [docs/brand](brand/) (`HANDOFF.md`, `tokens.css` and rendered
+lockups). These rules apply to everything in this repository.
 
 ## Logo and icon
 

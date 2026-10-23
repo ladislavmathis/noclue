@@ -16,6 +16,8 @@ provider account and incur its normal API charges. Chrome Web Store registration
    closing/reopening the cue during a share, and stopping the share. Confirm Stop clears test
    recordings; export before Stop if you need to retain test data.
 4. `npm run package` creates `release/noclue-<version>.zip`.
+5. When dependencies changed, check that `NOTICES.md` and `apps/extension/dist/NOTICES.txt` still
+   cover every package in the bundle (`grep -l <package> apps/extension/dist/assets/*.js`).
 
 ## Public repository
 
@@ -43,7 +45,7 @@ Regenerate the checked-in privacy page after editing PRIVACY.md with
    `store/promo-small-440x280.png`, `store/promo-marquee-1400x560.png` and five 1280×800
    screenshots of the panel, cue window, setup guide, practice answer and settings.
 4. Privacy tab: single purpose, permission justifications and data disclosures from
-   `store/LISTING.md`. Privacy policy URL from step 2.
+   `store/LISTING.md`. Privacy policy URL from the GitHub Pages section above.
 5. Submit. Review usually takes a few days and can take longer for `tabCapture`. Answer reviewer
    questions with the "Notes for the reviewer" text.
 6. Once the listing is approved, add its real URL to README.md, docs/sk/README.md and the landing

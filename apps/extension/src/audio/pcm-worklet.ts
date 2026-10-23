@@ -22,4 +22,4 @@ class PCMProcessor extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor('ignition-pcm', PCMProcessor);
+registerProcessor('noclue-pcm', PCMProcessor);

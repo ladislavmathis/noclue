@@ -57,11 +57,6 @@ const pickFallback = (key: string, options: readonly string[]) => {
   for (const char of key) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
   return options[hash % options.length];
 };
-export function speakable(text: string) {
-  const words = text.match(/\b[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*\b/gu) ?? [];
-  const sentences = text.split(/[.!?]+(?:\s|$)/).filter((s) => s.trim());
-  return words.length >= 1 && sentences.length <= 3;
-}
 export function fallback(
   decision: Decision & Partial<QuickDecision>,
   reason: string,
@@ -195,9 +190,6 @@ export function claimProblem(
   return undefined;
 }
 
-export function validateClaims(decision: Decision & Partial<QuickDecision>, project: Project) {
-  return claimProblem(decision, project) === undefined;
-}
 export function qualifyProposal(decision: Decision & Partial<QuickDecision>, project: Project) {
   // Only repair missing qualification after IDs and declared maturity passed.
   // This cannot turn a rejected achieved/validated claim into an allowed claim.
@@ -266,11 +258,6 @@ export function protectPersonalDraft(decision: Decision & Partial<QuickDecision>
   };
 }
 
-export function lengthProblem(text: string): string | undefined {
-  if (speakable(text)) return undefined;
-  const count = (text.match(/\b[\p{L}\p{N}]+(?:['’.-][\p{L}\p{N}]+)*\b/gu) ?? []).length;
-  return `Candidate has ${count} words. Rewrite it to 1–3 short sentences without adding claims. Do not return unchanged text.`;
-}
 export function currentQuestion(text: string) {
   // Explicit corrections replace the abandoned question, retaining original transcript elsewhere.
   const parts = text.split(/\b(?:actually|instead|let me rephrase)\s*[,;:]?\s*/i);
