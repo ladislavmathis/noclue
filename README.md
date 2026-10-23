@@ -10,8 +10,10 @@
 
 noclue is a Chrome extension. It listens to the other people in your meeting tab, notices when
 someone asks you something, and shows a short answer you can say in your own words. Answers
-come from the project facts and profile you add, and every factual sentence is checked against
-them before it is shown.
+use the project facts and profile you add. By default, answers appear after an AI evidence
+review. You can opt into earlier, clearly marked unverified drafts. Both drafts and reviewed
+answers can be wrong; check them before using them. General knowledge is allowed unless you
+turn on **Stick to my knowledge**.
 
 There is no noclue account and no noclue server. You use your own OpenAI key (and optionally
 your own Anthropic key), so you pay the AI provider directly and only for what you use.
@@ -21,14 +23,17 @@ your own Anthropic key), so you pay the AI provider directly and only for what y
 
 ## Install
 
-1. Install **noclue by ignition** from the Chrome Web Store.
-   _Until the listing is live: download `noclue-<version>.zip` from
-   [Releases](../../releases), unzip it, open `chrome://extensions`, turn on Developer mode,
-   choose **Load unpacked** and select the unzipped folder._
+1. Download `noclue-<version>.zip` from
+   [Releases](https://github.com/ladislavmathis/noclue/releases/latest), unzip it, open
+   `chrome://extensions`, turn on Developer mode, choose **Load unpacked** and select the
+   unzipped folder. The Chrome Web Store link will be added when the listing is available.
 2. The setup guide opens. Paste your OpenAI API key, test your microphone and read where your
    data goes. It takes about three minutes.
 3. Open a meeting in Chrome, click the noclue icon in the toolbar, add a few project facts and
    choose **Start Listening**.
+
+Reload meeting tabs that were already open when you installed or updated the extension.
+Screen-share observation starts when a supported meeting page loads; it does not capture audio.
 
 ### Getting API keys
 
@@ -55,7 +60,8 @@ fact-checked). See [OpenAI pricing](https://openai.com/api/pricing/) and
 - **Show cue window** opens a small movable window over the meeting. Click **Pop out** in it to
   move the cue into a separate floating window: sharing a tab or a window does not show it. When
   you share from the meeting's Present button, noclue hides the cue in the page, and hides the
-  floating window too if you share your whole screen. It comes back when sharing stops.
+  floating window too if it detects a whole-screen share. It comes back when sharing stops.
+  The in-page cue is readable by the meeting page; use the side panel for sensitive information.
 - **Stop** ends listening and clears the transcript. Closing the panel alone keeps listening.
 - **Try a practice question** shows how your facts support an answer, without recording audio.
 - **Stick to my knowledge** limits answers to your facts. Turned off, general questions can be
@@ -82,7 +88,8 @@ Full policy: [PRIVACY.md](PRIVACY.md).
 - Chrome desktop only. The Teams desktop app cannot be captured: open the meeting in Chrome.
 - Screen-share detection only sees shares started from the meeting page itself. A share started
   from another app or from macOS or Windows is not detected, and a whole-screen share also shows
-  the side panel.
+  the side panel. Detection is best effort, not a guarantee: hide the cue before sharing
+  sensitive information and verify what your audience can see.
 - noclue cannot see whether you are muted, whether a question was meant for you, or what you
   already said. Answers are only as good as the facts you add.
 

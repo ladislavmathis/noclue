@@ -95,4 +95,3 @@ Not applicable – brand manual only. App screens are not designed yet.
 
 ## Files
 - `noclue Design Manual.dc.html` – full design manual (open in browser; needs `support.js` alongside)
-- `Ignition Logo.dc.html` – all Ignition-family logos incl. noclue lockup (`#lg-noclue`) and icon tiles (`#lg-noclue-icon`, `#lg-noclue-dark`)

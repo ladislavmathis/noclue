@@ -1,6 +1,6 @@
 # noclue privacy policy
 
-_Last updated: 20 October 2026. Applies to the noclue by ignition Chrome extension, version 0.4
+_Last updated: 23 October 2026. Applies to the noclue by ignition Chrome extension, version 0.4
 and later._
 
 noclue is a Chrome extension that helps you answer questions during online meetings. It has no
@@ -35,14 +35,23 @@ provider keeps no data. Check your provider account's data retention settings.
 - It does not sell, share or transfer data to anyone, and uses no data for advertising or
   creditworthiness.
 - It does not collect analytics, crash reports or usage statistics.
-- It does not read web pages other than the meeting tab you start it on, where it shows the
-  optional cue window.
+- On supported Meet and Teams pages, a small observer starts when the page loads. It observes
+  screen-share start/end and the surface type (tab, window or screen), so the optional cue can
+  hide even when sharing started before you opened it. It does not read meeting content, start
+  capture, or send this information anywhere.
+
+The optional in-page cue puts the displayed question and answer into the meeting page's DOM,
+where that page's scripts can read them. Its pop-out uses the same page context. Use the
+extension side panel for sensitive information. Screen-share detection is best effort; shares
+started outside the meeting page are not detected. A whole-screen share can show the side panel.
 
 ## Test mode
 
 If you turn on test mode, questions, answers and timing are kept in memory so you can export
-them as a JSON file. Nothing is exported automatically. Stop, Clear test or closing the
-extension removes the recording.
+them as a JSON file. Nothing is exported automatically. Export before pressing Stop if you
+want to keep a copy. Stop and Clear test remove the in-memory recording, including on an error
+that stops listening. Closing only the side panel does not stop listening or clear the recording.
+Previously downloaded exports remain on your device until you delete them.
 
 ## Your choices
 

@@ -380,6 +380,11 @@ test('production Chrome tabCapture → local VAD → PCM → hub → recommendat
       if (soakSeconds >= 420) expect(soakQuestionCount).toBeGreaterThanOrEqual(45);
     }
     const before = bytes;
+    // Export while listening; Stop must discard the in-memory recording.
+    const log = await panel.evaluate(() =>
+      chrome.runtime.sendMessage({ target: 'offscreen', type: 'test.export' }),
+    );
+    expect(log.events.some((e: { kind: string }) => e.kind === 'quick.visible')).toBe(true);
     const stopStarted = performance.now();
     await panel.evaluate(() => chrome.runtime.sendMessage({ target: 'offscreen', type: 'stop' }));
     await expect
@@ -401,11 +406,12 @@ test('production Chrome tabCapture → local VAD → PCM → hub → recommendat
     expect(stopped.active).toBe(false);
     expect(stopped.segments).toEqual([]);
     expect(stopped.transcriptHistory).toEqual([]);
-    const log = await panel.evaluate(() =>
-      chrome.runtime.sendMessage({ target: 'offscreen', type: 'test.export' }),
-    );
-    expect(log.endedAt).toBeGreaterThan(log.startedAt);
-    expect(log.events.some((e: { kind: string }) => e.kind === 'quick.visible')).toBe(true);
+    expect(stopped.testLogCount).toBe(0);
+    expect(
+      await panel.evaluate(() =>
+        chrome.runtime.sendMessage({ target: 'offscreen', type: 'test.export' }),
+      ),
+    ).toBeNull();
     const storage = await panel.evaluate(() => chrome.storage.local.get(null));
     expect(JSON.stringify(storage)).not.toContain('quick.visible');
     await panel.evaluate(() =>

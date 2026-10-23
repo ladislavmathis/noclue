@@ -17,7 +17,7 @@
         <a class="logo" href="./"><img src="img/noclue-icon.svg" alt="" />noclue</a>
         <nav>
           <a href="#how">How it works</a><a href="privacy.html">Privacy</a
-          ><a href="https://github.com/" data-repo>GitHub</a>
+          ><a href="https://github.com/ladislavmathis/noclue">GitHub</a>
         </nav>
       </header>
       <main>
@@ -27,10 +27,11 @@
           <p class="lead">
             noclue is a Chrome extension for Google Meet and Microsoft Teams. It listens to the
             meeting, notices a question and suggests one to three sentences you can say in your own
-            words, based only on the facts you give it.
+            words, using the facts you give it. General knowledge is optional; AI answers can be
+            wrong.
           </p>
           <div class="cta">
-            <a class="button primary" href="#install" data-store>Add to Chrome</a>
+            <a class="button primary" href="#install">Install the beta</a>
             <a class="button" href="#how">How it works</a>
           </div>
         </section>
@@ -38,7 +39,8 @@
           <div class="card">
             <h3>Checked against your facts</h3>
             <p>
-              Every factual sentence is checked before you see it. Unknown numbers stay unknown.
+              By default, answers appear after an AI evidence review. You can opt into earlier
+              unverified drafts. Review answers before using them; the check can miss mistakes.
             </p>
           </div>
           <div class="card">
@@ -84,9 +86,18 @@
             an
             <a href="https://platform.openai.com/api-keys">OpenAI API key</a>.
           </p>
+          <p>
+            Download the release ZIP, unzip it, open <code>chrome://extensions</code>, enable
+            Developer mode and choose <strong>Load unpacked</strong>. Select the unzipped folder,
+            then reload any open meeting tabs. The Chrome Web Store link will be added when the
+            listing is available.
+          </p>
           <div class="cta" style="margin-bottom: 64px">
-            <a class="button primary" href="#install" data-store>Chrome Web Store</a>
-            <a class="button" href="https://github.com/" data-repo-releases>Download from GitHub</a>
+            <a
+              class="button primary"
+              href="https://github.com/ladislavmathis/noclue/releases/latest"
+              >Download the beta from GitHub</a
+            >
           </div>
         </section>
       </main>
@@ -95,17 +106,5 @@
         <span><a href="privacy.html">Privacy policy</a></span>
       </footer>
     </div>
-    <script>
-      // Filled in once the store listing and repository exist (see docs/RELEASE.md).
-      const STORE_URL = '';
-      const REPO_URL = 'https://github.com/ladislavmathis/noclue';
-      if (STORE_URL) document.querySelectorAll('[data-store]').forEach((a) => (a.href = STORE_URL));
-      if (REPO_URL) {
-        document.querySelectorAll('[data-repo]').forEach((a) => (a.href = REPO_URL));
-        document
-          .querySelectorAll('[data-repo-releases]')
-          .forEach((a) => (a.href = REPO_URL + '/releases/latest'));
-      }
-    </script>
   </body>
 </html>

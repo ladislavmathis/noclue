@@ -14,6 +14,35 @@ export async function mountCue() {
     existing.style.display = 'block';
     return;
   }
+  // Query before adding any UI: a share may already be active when this cue opens.
+  // DOM events are synchronous across the MAIN and isolated worlds. A missing reply
+  // means this tab predates the observer; do not expose a cue without observation.
+  let initialShares: [number, string][] | undefined;
+  const snapshot = (event: Event) => {
+    try {
+      const value: unknown = JSON.parse(String((event as CustomEvent).detail));
+      if (
+        Array.isArray(value) &&
+        value.every(
+          (entry) =>
+            Array.isArray(entry) &&
+            entry.length === 2 &&
+            Number.isSafeInteger(entry[0]) &&
+            typeof entry[1] === 'string',
+        )
+      )
+        initialShares = value;
+    } catch {
+      /* Ignore unrelated page events. */
+    }
+  };
+  document.addEventListener('noclue:share-state', snapshot);
+  document.dispatchEvent(new CustomEvent('noclue:share-query'));
+  document.removeEventListener('noclue:share-state', snapshot);
+  if (!initialShares)
+    throw new Error(
+      'Reload your meeting tab before showing the cue so screen-share detection is active.',
+    );
   const cueState: { pip: Window | null } = { pip: null };
   world.__noclueCue = cueState;
   // Fonts declared inside a shadow root are ignored, so Manrope is declared on the page
@@ -46,8 +75,7 @@ export async function mountCue() {
     .draft{font-size:12px;font-weight:700;color:var(--accent);margin:0 0 6px}
     .body{min-height:96px}footer button{font-size:12px;padding:3px 8px;border-radius:8px}footer{flex-shrink:0;padding:6px 10px 12px;display:flex;align-items:center;gap:5px;border-top:1px solid var(--line);flex-wrap:wrap}label{font-size:11px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}input{width:64px;accent-color:var(--accent)}.privacy{font-size:11px;color:var(--muted);margin:4px 0 0}.ver{position:absolute;right:22px;bottom:4px;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;pointer-events:none}.answer.unverified{opacity:.7;font-style:italic}
     .history{list-style:none;margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}.history[hidden]{display:none}.history li{opacity:.65;display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:start}.history .h-question{grid-column:1;font-size:12px;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history .h-answer{grid-column:1;font-size:13px;line-height:1.4;white-space:pre-wrap;margin:0}.history .h-copy{grid-column:2;grid-row:1/3;font-size:12px;padding:2px 8px}
-  </style><section aria-label="noclue cue window"><header tabindex="0" aria-label="Move cue window with arrow keys"><strong><svg viewBox="0 0 100 100" width="18" height="18" aria-hidden="true"><defs><linearGradient id="nc-cue-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF7A3C"/><stop offset="1" stop-color="#F35216"/></linearGradient></defs><rect width="100" height="100" rx="25" fill="url(#nc-cue-g)"/><g transform="translate(19 19) scale(.62)"><path d="M30 34 A20 20 0 1 1 58 52 Q50 57 50 66 L50 70" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/><circle cx="50" cy="88" r="9" fill="#fff"/></g></svg>noclue</strong><button id="pop" aria-label="Pop out cue window" title="Open in a separate window that tab and window shares do not show" hidden>Pop out</button><button id="min" aria-label="Minimize cue">−</button><button id="close" aria-label="Hide cue">×</button></header><div class="body"><p class="status">Ready</p><p class="question" style="font-size:12px;color:var(--muted)"></p><p class="draft" hidden>Draft · adapt it to you</p><p class="answer">Your next cue will appear here.</p><p class="advice"></p><ul class="history" hidden aria-label="Earlier answers"></ul></div><footer><button id="answer" disabled>Answer Now</button><button id="stop" disabled>Stop</button><button id="copy" disabled>Copy response</button><button id="dismiss" disabled>Dismiss</button><button data-feedback="helpful" aria-label="Helpful">👍</button><button data-feedback="unhelpful" aria-label="Not helpful">👎</button><button data-feedback="slow">Too slow</button><button data-feedback="long">Too long</button><button data-feedback="wrong">Wrong</button><label>Opacity<input id="opacity" type="range" min="45" max="100" value="90" aria-label="Cue opacity"/></label><p class="privacy">Pop out to keep the cue off shared tabs and windows. noclue hides it while you share your whole screen.</p></footer><span class="ver" data-testid="cue-version">v${typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'}</span></section>`;
-  document.documentElement.append(host);
+  </style><section aria-label="noclue cue window"><header tabindex="0" aria-label="Move cue window with arrow keys"><strong><svg viewBox="0 0 100 100" width="18" height="18" aria-hidden="true"><defs><linearGradient id="nc-cue-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF7A3C"/><stop offset="1" stop-color="#F35216"/></linearGradient></defs><rect width="100" height="100" rx="25" fill="url(#nc-cue-g)"/><g transform="translate(19 19) scale(.62)"><path d="M30 34 A20 20 0 1 1 58 52 Q50 57 50 66 L50 70" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/><circle cx="50" cy="88" r="9" fill="#fff"/></g></svg>noclue</strong><button id="pop" aria-label="Pop out cue window" title="Open in a separate window that tab and window shares do not show" hidden>Pop out</button><button id="min" aria-label="Minimize cue">−</button><button id="close" aria-label="Hide cue">×</button></header><div class="body"><p class="status">Ready</p><p class="question" style="font-size:12px;color:var(--muted)"></p><p class="draft" hidden>Draft · adapt it to you</p><p class="answer">Your next cue will appear here.</p><p class="advice"></p><ul class="history" hidden aria-label="Earlier answers"></ul></div><footer><button id="answer" disabled>Answer Now</button><button id="stop" disabled>Stop</button><button id="copy" disabled>Copy response</button><button id="dismiss" disabled>Dismiss</button><button data-feedback="helpful" aria-label="Helpful">👍</button><button data-feedback="unhelpful" aria-label="Not helpful">👎</button><button data-feedback="slow">Too slow</button><button data-feedback="long">Too long</button><button data-feedback="wrong">Wrong</button><label>Opacity<input id="opacity" type="range" min="45" max="100" value="90" aria-label="Cue opacity"/></label><p class="privacy">Pop out to keep the cue off shared tabs and windows. Auto-hide is best effort. The meeting page can read this cue; use the side panel for sensitive information.</p></footer><span class="ver" data-testid="cue-version">v${typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'}</span></section>`;
   const el = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   let minimized = false,
     previousHeight = 290,
@@ -94,7 +122,6 @@ export async function mountCue() {
     );
   }
   host.style.opacity = String(Number(el<HTMLInputElement>('#opacity').value) / 100);
-  clamp();
   el<HTMLInputElement>('#opacity').oninput = () => {
     host.style.opacity = String(Number(el<HTMLInputElement>('#opacity').value) / 100);
     save();
@@ -152,7 +179,7 @@ export async function mountCue() {
     clamp();
   };
   // Screen shares started from this page, announced by hookDisplayMedia in the MAIN world.
-  const shares = new Map<number, string>();
+  const shares = new Map<number, string>(initialShares);
   let shareHidden = false;
   const cueVisible = () =>
     !shareHidden && (cueState.pip ? true : document.visibilityState === 'visible');
@@ -179,6 +206,12 @@ export async function mountCue() {
         active: boolean;
         surface: string;
       };
+      if (
+        !Number.isSafeInteger(detail.id) ||
+        typeof detail.active !== 'boolean' ||
+        typeof detail.surface !== 'string'
+      )
+        return;
       if (detail.active) shares.set(detail.id, detail.surface);
       else shares.delete(detail.id);
       applyShares();
@@ -187,6 +220,22 @@ export async function mountCue() {
     }
   };
   document.addEventListener('noclue:share', onShare);
+  // Storage reads above yield. Refresh after subscribing to cover shares started or
+  // stopped during those reads, before the cue is attached or contains private text.
+  document.addEventListener('noclue:share-state', snapshot);
+  document.dispatchEvent(new CustomEvent('noclue:share-query'));
+  document.removeEventListener('noclue:share-state', snapshot);
+  shares.clear();
+  for (const [id, surface] of initialShares) shares.set(id, surface);
+  // Initial hiding cannot acknowledge an answer: rendering has not started yet.
+  shareHidden = shares.size > 0;
+  host.style.visibility = shareHidden ? 'hidden' : '';
+  document.documentElement.append(host);
+  clamp();
+  if (shareHidden)
+    void chrome.runtime
+      .sendMessage({ target: 'panel', type: 'cue.share', hidden: true })
+      .catch(() => {});
   // Document Picture-in-Picture: an always-on-top window that is not part of the meeting tab,
   // so tab and window shares do not include it. It needs a click in this page every time.
   const pictureInPicture = (

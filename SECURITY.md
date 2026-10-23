@@ -15,3 +15,7 @@ Known by design:
 - The OpenAI key is sent as a WebSocket subprotocol for realtime transcription, because
   browsers cannot set an Authorization header on WebSockets. It travels only over TLS to
   api.openai.com.
+- The optional cue is part of the meeting page's DOM (including its Picture-in-Picture window).
+  Page scripts can read it; Shadow DOM is styling isolation, not a security boundary. Use the
+  extension side panel for sensitive information. Screen-share observation is best effort and
+  cannot detect sharing started by another app.

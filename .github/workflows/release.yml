@@ -17,8 +17,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run secrets:check
+      - run: npm run format:check
       - run: npm run typecheck
       - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: xvfb-run -a npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: test-results
       - name: Check tag matches package version
         run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: npm run package

@@ -11,7 +11,12 @@ const { version } = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8
 if (manifest.version !== version) throw new Error('Build is stale: run npm run build first.');
 if (JSON.stringify(manifest).includes('127.0.0.1'))
   throw new Error('This is a test build (localhost permission). Run npm run build.');
-for (const required of ['NOTICES.txt', 'icons/icon-128.png', 'vad/silero_vad_v5.onnx'])
+for (const required of [
+  'NOTICES.txt',
+  'icons/icon-128.png',
+  'vad/silero_vad_v5.onnx',
+  'share-observer.js',
+])
   if (!existsSync(resolve(dist, required))) throw new Error(`Missing ${required} in the build.`);
 mkdirSync(resolve(root, 'release'), { recursive: true });
 const zip = resolve(root, 'release', `noclue-${version}.zip`);

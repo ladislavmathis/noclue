@@ -3,6 +3,7 @@ import { MeetingSession } from '../packages/core/src/sessions/session';
 import type { Recommend } from '../packages/core/src/recommendations/provider';
 import {
   LIMITS,
+  defaultPreferences,
   initialState,
   visibleCue,
   type Decision,
@@ -11,7 +12,15 @@ import {
   type Suggestion,
 } from '@noclue/shared';
 
-const project = { name: 'Fictional', role: 'Lead', goal: 'Pilot', context: 'C', keywords: [] };
+// These lifecycle cases exercise the explicitly opted-in preview mode.
+const project = {
+  name: 'Fictional',
+  role: 'Lead',
+  goal: 'Pilot',
+  context: 'C',
+  keywords: [],
+  preferences: { ...defaultPreferences, previewUnverified: true },
+};
 const decision: Decision = {
   action: 'suggest',
   responseType: 'answer',
