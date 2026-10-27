@@ -249,12 +249,25 @@ export async function mountCue() {
   popButton.hidden = !pictureInPicture;
   popButton.classList.toggle('suggest', preferPopout);
   let pageStyle = '';
+  /** Remember whether the next cue should suggest Pop out; Chrome needs a click to open it. */
+  const storePopout = (popout: boolean) => {
+    preferPopout = popout;
+    popButton.classList.remove('suggest');
+    clearTimeout(saveTimer);
+    void chrome.storage.local
+      .get('cueLayout')
+      .then(({ cueLayout }) =>
+        chrome.storage.local.set({ cueLayout: { ...(cueLayout ?? {}), popout } }),
+      );
+  };
   const restore = () => {
     const pip = cueState.pip;
     if (!pip) return;
     cueState.pip = null;
     host.removeAttribute('data-popout');
+    // Hiding the cue while popped out keeps the preference. Coming back to the page drops it.
     if (closed) return;
+    storePopout(false);
     host.style.cssText = pageStyle;
     host.style.opacity = String(Number(el<HTMLInputElement>('#opacity').value) / 100);
     document.documentElement.append(host);
@@ -281,14 +294,7 @@ export async function mountCue() {
       return;
     }
     if (minimized) el<HTMLButtonElement>('#min').click();
-    preferPopout = true;
-    popButton.classList.remove('suggest');
-    clearTimeout(saveTimer);
-    void chrome.storage.local
-      .get('cueLayout')
-      .then(({ cueLayout }) =>
-        chrome.storage.local.set({ cueLayout: { ...(cueLayout ?? {}), popout: true } }),
-      );
+    storePopout(true);
     const font = document.getElementById('noclue-cue-font');
     if (font) pip.document.head.append(font.cloneNode(true));
     pip.document.title = 'noclue cue';

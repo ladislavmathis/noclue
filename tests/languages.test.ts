@@ -13,6 +13,7 @@ import {
   fallback,
   isSafeTemplate,
   qualifyProposal,
+  technicalQuestion,
 } from '../packages/core/src/recommendations/quick';
 import {
   ProjectSchema,
@@ -126,6 +127,38 @@ describe('question detection per language', () => {
   it('a fixed non-English language ignores English cues', () => {
     expect(inspectQuestion('What is the budget', 'sk').candidate).toBe(false);
   });
+  it('automatic mode does not read English statements as German or Czech questions', () => {
+    for (const statement of [
+      'It was a good quarter',
+      'Our co-founder joined the call today',
+      'Hat sizes vary across the team',
+      'The team met in the lobby',
+      'Revenue was up and the wo-man team grew',
+    ])
+      expect(inspectQuestion(statement, 'auto').candidate, statement).toBe(false);
+  });
+  it('short interrogatives still open a question, also after a filler', () => {
+    for (const [text, language] of [
+      ['Was kostet das Pilotprojekt', 'auto'],
+      ['Und wie läuft die Integration', 'auto'],
+      ['Wo starten wir den Piloten', 'de'],
+      ['Takže čo ďalej', 'sk'],
+      ['A čo rozpočet', 'auto'],
+      ['Jak dlouho potrvá pilot', 'cs'],
+      ['Hat das Team schon Feedback', 'auto'],
+      ['Hat er Zeit am Montag', 'de'],
+    ] as [string, MeetingLanguage][])
+      expect(inspectQuestion(text, language).candidate, text).toBe(true);
+  });
+  it('relative uses of an interrogative are not questions', () => {
+    for (const [text, language] of [
+      ['Wie besprochen starten wir im März', 'de'],
+      ['Ako sme sa dohodli, začneme v marci', 'sk'],
+      ['Jak jsme říkali, začneme v březnu', 'cs'],
+      ['Wie gesagt, das Budget steht', 'auto'],
+    ] as [string, MeetingLanguage][])
+      expect(inspectQuestion(text, language).candidate, text).toBe(false);
+  });
   it('the question engine uses its language', () => {
     const engine = new QuestionEngine('de');
     const { question } = engine.update({
@@ -178,6 +211,20 @@ describe('localized spoken phrases', () => {
         expect(text).toBeTruthy();
     }
   });
+  it("Slovak and Czech phrases do not assume the speaker's gender", () => {
+    for (const language of ['sk', 'cs'] as const) {
+      const p = PHRASES[language];
+      for (const text of [
+        ...p.quick,
+        ...p.technical,
+        ...p.acknowledgement,
+        p.clarifyPoint,
+        p.clarifyOption,
+        p.noVerifiedInfo,
+      ])
+        expect(text).not.toMatch(/(?<!\p{L})(?:odpovedal|odpověděl|istý|jistý|rád|ráda)(?!\p{L})/u);
+    }
+  });
   it('automatic mode falls back to English phrases', () => {
     expect(phrasesFor('auto')).toBe(PHRASES.en);
   });
@@ -194,6 +241,38 @@ describe('localized spoken phrases', () => {
       const ack = fallback(decision, 'No support.', examples[language as 'sk'].statement, language);
       expect(PHRASES[language as 'sk'].acknowledgement).toContain(ack.suggestedResponse);
     });
+});
+
+describe('technical questions per language', () => {
+  const technical = {
+    sk: 'Ako máte vyriešenú bezpečnosť a šifrovanie dát',
+    cs: 'Jak řešíte šifrování a bezpečnost dat',
+    de: 'Wie ist die Architektur des Systems aufgebaut',
+  };
+  for (const language of ['sk', 'cs', 'de'] as const)
+    it(`${language}: a technical question defers to the development team`, () => {
+      expect(technicalQuestion(technical[language], language)).toBe(true);
+      const result = fallback(decision, 'No support.', technical[language], language);
+      expect(PHRASES[language].technical).toContain(result.suggestedResponse);
+      expect(isSafeTemplate(result.suggestedResponse)).toBe(true);
+    });
+  it('institution names and business models are not technical', () => {
+    expect(
+      technicalQuestion('Kedy začína spolupráca s Technickou univerzitou v Košiciach', 'sk'),
+    ).toBe(false);
+    expect(technicalQuestion('Aký je váš obchodný model', 'sk')).toBe(false);
+    expect(technicalQuestion('Jaký je váš obchodní model', 'cs')).toBe(false);
+    expect(
+      technicalQuestion('Wann starten Sie mit der Technischen Universität München', 'de'),
+    ).toBe(false);
+    expect(technicalQuestion('Wie sieht Ihr Geschäftsmodell aus', 'de')).toBe(false);
+  });
+  it('English stays English-only, automatic mode knows every language', () => {
+    expect(technicalQuestion(technical.de, 'en')).toBe(false);
+    expect(technicalQuestion(technical.de, 'auto')).toBe(true);
+    const result = fallback(decision, 'No support.', technical.cs, 'auto');
+    expect(PHRASES.en.technical).toContain(result.suggestedResponse);
+  });
 });
 
 describe('English wording checks', () => {
@@ -225,6 +304,18 @@ describe('English wording checks', () => {
     expect(englishWording('Pilot začneme v marci.', 'auto')).toBe(false);
     expect(englishWording('Pilot začneme v marci.', 'en')).toBe(true);
     expect(englishWording('We start the pilot in March.', 'sk')).toBe(false);
+  });
+  it('does not count Slovak and Czech a, i, to as English', () => {
+    expect(englishWording('Chceme to spustiť v marci a potom to overiť.', 'auto')).toBe(false);
+    expect(englishWording('Chceme to spustit v březnu a pak to ověřit.', 'auto')).toBe(false);
+    expect(englishWording('To je on a ja, i keď to nie je isté.', 'auto')).toBe(false);
+    expect(englishWording('I think it is a good idea to start in March.', 'auto')).toBe(true);
+  });
+  it('leaves a Slovak answer alone in automatic mode', () => {
+    const text = 'Pilot je naplánovaný na marec a potom to vyhodnotíme.';
+    const answer = planned('auto', text);
+    expect(claimProblem(answer, project('auto'))).toBeUndefined();
+    expect(qualifyProposal(answer, project('auto')).suggestedResponse).toBe(text);
   });
   it('still demands planned wording from an English answer', () => {
     const answer = planned('en', 'The pilot starts in March.');

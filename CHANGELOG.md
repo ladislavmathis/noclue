@@ -23,6 +23,15 @@ nekompatibilné zmeny. Pri každej verzii pribudne záznam sem a git tag `vX.Y.Z
 - Diagnostická konzola neukladá voľný text z AI kontroly. Kontrola secretov zachytáva aj
   ďalšie typy tokenov, vnorené `.env` súbory a kľúče za testovacími hodnotami.
 - Vitest aktualizovaný na 4.1.12 kvôli oprave zraniteľností vo vývojových závislostiach.
+- Automatický jazyk meetingu už nepovažuje anglické vety za nemecké či české otázky. Krátke
+  opytovacie slová (`was`, `wie`, `wo`, `co`, `jak`, `čo`, `ako`) platia len na začiatku vety,
+  „co-founder“ už nie je české „co“ a „Wie besprochen …“ či „Ako sme …“ nie sú otázky.
+- Slovenské a české odpovede v automatickom režime už neprechádzajú anglickými kontrolami
+  formulácií; slová ako „a“, „i“ a „to“ sa nepočítajú ako angličtina.
+- Slovenské a české záložné vety neprezrádzajú rod hovoriaceho a technická otázka v slovenčine,
+  češtine alebo nemčine dostane odpoveď „overím to s vývojovým tímom“.
+- Cue po návrate z Pop out (Back) už ďalej nezvýrazňuje Pop out. Ak cue skryješ v samostatnom
+  okne, ďalšie cue Pop out stále ponúkne.
 
 ## 0.5.0 — 20. 10. 2026
 

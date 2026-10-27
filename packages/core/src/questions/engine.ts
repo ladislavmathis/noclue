@@ -13,16 +13,27 @@ export const normalizeQuestion = (text: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 /**
+ * Words for the cue lookup below. Unlike normalizeQuestion, a hyphen between letters keeps the
+ * word whole, so "co-founder" never reads as the Czech "co".
+ */
+const cueWords = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}'-]/gu, ' ')
+    .replace(/(?<!\p{L})-|-(?!\p{L})/gu, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+/**
  * Question cues for the non-English meeting languages: interrogative words, request verbs
- * and auxiliaries that open a yes/no question. Matched on normalized (lowercase) text with
- * Unicode-aware word boundaries, because \b does not treat letters like č or ü as word characters.
+ * and auxiliaries that open a yes/no question. Matched by exact lookup in the word list from
+ * cueWords. In automatic mode every utterance is checked against all three languages, so short
+ * interrogatives that are also ordinary English or relative words (German "was", "wie", "wo",
+ * "wer", Czech "co", "jak", Slovak "čo", "ako") count only when they open the utterance.
  */
 const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: string[] }> = {
   sk: {
     anywhere: [
-      'čo',
       'prečo',
-      'ako',
       'kto',
       'kedy',
       'kde',
@@ -44,6 +55,8 @@ const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: s
       'predstavte',
     ],
     opening: [
+      'čo',
+      'ako',
       'môžete',
       'môžeš',
       'mohli',
@@ -68,9 +81,7 @@ const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: s
   },
   cs: {
     anywhere: [
-      'co',
       'proč',
-      'jak',
       'kdo',
       'kdy',
       'kde',
@@ -92,6 +103,8 @@ const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: s
       'představte',
     ],
     opening: [
+      'co',
+      'jak',
       'můžete',
       'můžeš',
       'mohli',
@@ -117,16 +130,12 @@ const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: s
   },
   de: {
     anywhere: [
-      'was',
       'warum',
       'wieso',
       'weshalb',
-      'wie',
-      'wer',
       'wen',
       'wem',
       'wann',
-      'wo',
       'woher',
       'wohin',
       'welche',
@@ -141,6 +150,10 @@ const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: s
       'erzähle',
     ],
     opening: [
+      'was',
+      'wie',
+      'wo',
+      'wer',
       'können',
       'kannst',
       'könnten',
@@ -167,15 +180,43 @@ const QUESTION_CUES: Record<'sk' | 'cs' | 'de', { anywhere: string[]; opening: s
   },
 };
 const FILLERS: Record<'sk' | 'cs' | 'de', string[]> = {
-  sk: ['tak', 'a', 'no', 'dobre', 'okej', 'vlastne'],
-  cs: ['tak', 'a', 'no', 'dobře', 'okej', 'vlastně'],
-  de: ['also', 'und', 'okay', 'gut', 'eigentlich', 'na'],
+  sk: ['tak', 'takže', 'a', 'no', 'dobre', 'okej', 'vlastne'],
+  cs: ['tak', 'takže', 'a', 'no', 'dobře', 'okej', 'vlastně'],
+  de: ['also', 'und', 'dann', 'okay', 'gut', 'eigentlich', 'na'],
 };
-function cueCandidate(words: string[], language: 'sk' | 'cs' | 'de') {
+/** Openings that use an interrogative as a relative word: "Wie besprochen …", "Ako sme …". */
+const NON_QUESTION_OPENINGS: Record<'sk' | 'cs' | 'de', string[]> = {
+  sk: ['ako sme', 'ako bolo', 'ako som'],
+  cs: ['jak jsme', 'jak bylo', 'jak jsem'],
+  de: ['wie besprochen', 'wie gesagt', 'wie erwähnt', 'wie vereinbart', 'wie geplant'],
+};
+/**
+ * German "hat" is also an English noun. In automatic mode it opens a question only when a
+ * German subject follows ("Hat das Team …", "Hat er …").
+ */
+const GERMAN_SUBJECTS = [
+  'er',
+  'sie',
+  'es',
+  'man',
+  'ihr',
+  'das',
+  'der',
+  'die',
+  'den',
+  'dein',
+  'euer',
+  'unser',
+  'jemand',
+];
+function cueCandidate(words: string[], language: 'sk' | 'cs' | 'de', auto = false) {
   const cues = QUESTION_CUES[language];
   if (words.some((w) => cues.anywhere.includes(w))) return true;
-  const first = FILLERS[language].includes(words[0]) ? words[1] : words[0];
-  return !!first && cues.opening.includes(first);
+  const rest = FILLERS[language].includes(words[0]) ? words.slice(1) : words;
+  if (!rest[0] || !cues.opening.includes(rest[0])) return false;
+  if (auto && rest[0] === 'hat' && !GERMAN_SUBJECTS.includes(rest[1])) return false;
+  const opening = rest.slice(0, 2).join(' ');
+  return !NON_QUESTION_OPENINGS[language].includes(opening);
 }
 function englishInspection(normalized: string) {
   const strandedPreposition = /\b(what|which|who)\b.+\b(for|to|with|about|of)$/.test(normalized);
@@ -206,8 +247,11 @@ export function inspectQuestion(text: string, language: MeetingLanguage = 'en') 
     language === 'en' || language === 'auto' ? englishInspection(normalized) : undefined;
   const others =
     language === 'auto' ? (['sk', 'cs', 'de'] as const) : language === 'en' ? [] : [language];
+  const cued = others.length ? cueWords(text) : [];
   const candidate =
-    !!english?.candidate || others.some((l) => cueCandidate(words, l)) || text.includes('?');
+    !!english?.candidate ||
+    others.some((l) => cueCandidate(cued, l, language === 'auto')) ||
+    text.includes('?');
   // In automatic mode the English check applies only when the text reads as English.
   const incomplete = !!english?.incomplete && (language === 'en' || english.candidate);
   return {
