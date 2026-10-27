@@ -126,6 +126,38 @@ describe('question detection per language', () => {
   it('a fixed non-English language ignores English cues', () => {
     expect(inspectQuestion('What is the budget', 'sk').candidate).toBe(false);
   });
+  it('automatic mode does not read English statements as German or Czech questions', () => {
+    for (const statement of [
+      'It was a good quarter',
+      'Our co-founder joined the call today',
+      'Hat sizes vary across the team',
+      'The team met in the lobby',
+      'Revenue was up and the wo-man team grew',
+    ])
+      expect(inspectQuestion(statement, 'auto').candidate, statement).toBe(false);
+  });
+  it('short interrogatives still open a question, also after a filler', () => {
+    for (const [text, language] of [
+      ['Was kostet das Pilotprojekt', 'auto'],
+      ['Und wie läuft die Integration', 'auto'],
+      ['Wo starten wir den Piloten', 'de'],
+      ['Takže čo ďalej', 'sk'],
+      ['A čo rozpočet', 'auto'],
+      ['Jak dlouho potrvá pilot', 'cs'],
+      ['Hat das Team schon Feedback', 'auto'],
+      ['Hat er Zeit am Montag', 'de'],
+    ] as [string, MeetingLanguage][])
+      expect(inspectQuestion(text, language).candidate, text).toBe(true);
+  });
+  it('relative uses of an interrogative are not questions', () => {
+    for (const [text, language] of [
+      ['Wie besprochen starten wir im März', 'de'],
+      ['Ako sme sa dohodli, začneme v marci', 'sk'],
+      ['Jak jsme říkali, začneme v březnu', 'cs'],
+      ['Wie gesagt, das Budget steht', 'auto'],
+    ] as [string, MeetingLanguage][])
+      expect(inspectQuestion(text, language).candidate, text).toBe(false);
+  });
   it('the question engine uses its language', () => {
     const engine = new QuestionEngine('de');
     const { question } = engine.update({
