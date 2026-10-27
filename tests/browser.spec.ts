@@ -639,13 +639,20 @@ test('cue pops out into a Picture-in-Picture window that only a whole-screen sha
     await share(1, false, 'browser');
     await share(2, false, 'window');
     await expect(page.locator('#noclue-cue')).toHaveCSS('visibility', 'visible');
-    expect(
-      await page.evaluate(
-        async () => (await chrome.storage.local.get('cueLayout')).cueLayout?.popout,
-      ),
-    ).toBe(true);
-    // The next cue highlights Pop out, since Chrome needs a click to open the window.
+    const storedPopout = () =>
+      page.evaluate(async () => (await chrome.storage.local.get('cueLayout')).cueLayout?.popout);
+    // Choosing Back drops the preference, so the next cue does not suggest Pop out.
+    await expect.poll(storedPopout).toBe(false);
     await page.locator('#noclue-cue').getByRole('button', { name: 'Hide cue' }).click();
+    await mountTestCue(page);
+    await expect(page.locator('#noclue-cue #pop')).not.toHaveClass(/suggest/);
+    // Hiding the cue while it is popped out keeps the preference: the next cue highlights
+    // Pop out, since Chrome needs a click to open the window.
+    const reopened = context.waitForEvent('page');
+    await page.locator('#noclue-cue').getByRole('button', { name: 'Pop out cue window' }).click();
+    const pip2 = await reopened;
+    await pip2.locator('#noclue-cue').getByRole('button', { name: 'Hide cue' }).click();
+    await expect.poll(storedPopout).toBe(true);
     await mountTestCue(page);
     await expect(page.locator('#noclue-cue #pop')).toHaveClass(/suggest/);
   } finally {
