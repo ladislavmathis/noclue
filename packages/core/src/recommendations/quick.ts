@@ -44,14 +44,53 @@ export function englishWording(text: string, language: MeetingLanguage) {
 export const QUICK_FALLBACK = QUICK_FALLBACKS[0];
 const TECHNICAL_TERMS =
   /\b(?:architecture|algorithm|api|apis|latency|throughput|accuracy|precision|recall|benchmark|benchmarks|dataset|datasets|training|inference|implementation|implemented|integration|integrated|encryption|encrypted|security|infrastructure|pipeline|ontology|framework|protocol|database|deployment|deployed|scalability|source code|software|hardware|technical|technically|parameters|metrics|neural|llm|llms|transformer|embedding|embeddings|vector|tokens|gpu|compute|model|models|detection|detector|classifier|fine-?tun\w*|hallucinat\w*|retriev\w*)\b/i;
+/**
+ * Technical terms per non-English meeting language. Slovak and Czech inflect heavily, so most
+ * entries are stems. \b is ASCII-only, so word edges are letter lookarounds instead.
+ */
+const termPattern = (stems: string) => new RegExp(`(?<!\\p{L})(?:${stems})(?!\\p{L})`, 'iu');
+const TECHNICAL_BY_LANGUAGE: Record<'sk' | 'cs' | 'de', { terms: RegExp; ignore: RegExp[] }> = {
+  sk: {
+    terms: termPattern(
+      'architektúr\\p{L}*|algoritm\\p{L}*|latenci\\p{L}*|priepustnos[tť]\\p{L}*|presnos[tť]\\p{L}*|trénovan\\p{L}*|inferenci\\p{L}*|implementáci\\p{L}*|integráci\\p{L}*|šifrovan\\p{L}*|bezpečnos[tť]\\p{L}*|infraštruktúr\\p{L}*|databáz\\p{L}*|nasadeni\\p{L}*|škálovateľnos[tť]\\p{L}*|zdrojov\\p{L}* kód\\p{L}*|softvér\\p{L}*|hardvér\\p{L}*|technick\\p{L}*|parametr\\p{L}*|metrik\\p{L}*|neurónov\\p{L}*|model\\p{L}*|detekci\\p{L}*|klasifikátor\\p{L}*|vektor\\p{L}*|token\\p{L}*|výpočt\\p{L}*|halucin\\p{L}*',
+    ),
+    ignore: [
+      termPattern('technick\\p{L}* univerzit\\p{L}*'),
+      termPattern('obchodn\\p{L}* model\\p{L}*'),
+    ],
+  },
+  cs: {
+    terms: termPattern(
+      'architektur\\p{L}*|algoritm\\p{L}*|latenc\\p{L}*|propustnos[tť]\\p{L}*|přesnos[tť]\\p{L}*|trénován\\p{L}*|inferenc\\p{L}*|implementac\\p{L}*|integrac\\p{L}*|šifrován\\p{L}*|bezpečnos[tť]\\p{L}*|infrastruktur\\p{L}*|databáz\\p{L}*|nasazen\\p{L}*|škálovatelnos[tť]\\p{L}*|zdrojov\\p{L}* kód\\p{L}*|technick\\p{L}*|parametr\\p{L}*|metrik\\p{L}*|neuronov\\p{L}*|model\\p{L}*|detekc\\p{L}*|klasifikátor\\p{L}*|vektor\\p{L}*|token\\p{L}*|výpoč[et]\\p{L}*|halucin\\p{L}*',
+    ),
+    ignore: [
+      termPattern('technick\\p{L}* univerzit\\p{L}*'),
+      termPattern('obchodn\\p{L}* model\\p{L}*'),
+    ],
+  },
+  de: {
+    terms: termPattern(
+      'architektur\\p{L}*|algorithm\\p{L}*|latenz\\p{L}*|durchsatz\\p{L}*|genauigkeit\\p{L}*|trainier\\p{L}*|inferenz\\p{L}*|implementier\\p{L}*|integration\\p{L}*|integrier\\p{L}*|verschlüssel\\p{L}*|sicherheit\\p{L}*|infrastruktur\\p{L}*|datenbank\\p{L}*|bereitstell\\p{L}*|skalierbar\\p{L}*|quellcode\\p{L}*|technisch\\p{L}*|parameter\\p{L}*|metrik\\p{L}*|neuronal\\p{L}*|modell\\p{L}*|erkennung\\p{L}*|klassifikator\\p{L}*|vektor\\p{L}*|rechenleistung|halluzin\\p{L}*',
+    ),
+    ignore: [termPattern('technisch\\p{L}* (?:universität|hochschule)\\p{L}*')],
+  },
+};
 /** Institution names ("University of Technology", "Technical University") are not technical content. */
-export function technicalQuestion(question: string | undefined) {
+export function technicalQuestion(question: string | undefined, language: MeetingLanguage = 'en') {
   if (!question) return false;
   const text = question
     .replace(/\b(?:university|institute|academy) of technology\b/gi, ' ')
     .replace(/\btechnical university\b/gi, ' ')
     .replace(/\bbusiness model\b/gi, ' ');
-  return TECHNICAL_TERMS.test(text);
+  const others =
+    language === 'auto' ? (['sk', 'cs', 'de'] as const) : language === 'en' ? [] : [language];
+  const cleaned = others
+    .flatMap((l) => TECHNICAL_BY_LANGUAGE[l].ignore)
+    .reduce((t, pattern) => t.replace(new RegExp(pattern.source, 'giu'), ' '), text);
+  return (
+    TECHNICAL_TERMS.test(cleaned) ||
+    others.some((l) => TECHNICAL_BY_LANGUAGE[l].terms.test(cleaned))
+  );
 }
 const pickFallback = (key: string, options: readonly string[]) => {
   let hash = 0;
@@ -69,7 +108,7 @@ export function fallback(
   question?: string,
   language: MeetingLanguage = 'en',
 ) {
-  const technical = technicalQuestion(question);
+  const technical = technicalQuestion(question, language);
   const statement = !!question?.trim() && !inspectQuestion(question, language).candidate;
   const phrases = phrasesFor(language);
   return {

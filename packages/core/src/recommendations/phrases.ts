@@ -44,8 +44,8 @@ export const PHRASES: Record<SpokenLanguage, Phrases> = {
     quick: [
       'Mohli by ste trochu priblížiť, čo presne máte na mysli? Chcem vám odpovedať presne.',
       'Mohli by ste otázku zopakovať? Chcem sa uistiť, že odpoviem presne na to, na čo sa pýtate.',
-      'To je dobrá otázka. Ktorá časť je pre vás najdôležitejšia, aby som odpovedal presne?',
-      'Chcem si byť istý, že vám správne rozumiem. Mohli by ste to povedať inak?',
+      'To je dobrá otázka. Ktorá časť je pre vás najdôležitejšia? Chcem odpovedať presne.',
+      'Chcem mať istotu, že vám správne rozumiem. Mohli by ste to povedať inak?',
     ],
     technical: [
       'To je podrobná technická otázka. Radšej to overím s naším vývojovým tímom a ozvem sa vám s presnou odpoveďou.',
@@ -56,9 +56,9 @@ export const PHRASES: Record<SpokenLanguage, Phrases> = {
       'Ďakujem, to nám vyhovuje. Ostaňme v kontakte ohľadom ďalších krokov.',
     ],
     clarifyPoint:
-      'Mohli by ste upresniť, ktorý bod máte na mysli? Potrebujem trochu viac kontextu, aby som odpovedal presne.',
+      'Mohli by ste upresniť, ktorý bod máte na mysli? Potrebujem trochu viac kontextu, aby bola moja odpoveď presná.',
     clarifyOption:
-      'Mohli by ste upresniť, ktorú možnosť máte na mysli? Potrebujem to vedieť, aby som odpovedal presne.',
+      'Mohli by ste upresniť, ktorú možnosť máte na mysli? Potrebujem to vedieť, aby bola moja odpoveď presná.',
     noVerifiedInfo:
       'K tomu nemám v poznámkach overené informácie, takže zatiaľ nemôžem dať spoľahlivú odpoveď.',
   },
@@ -66,8 +66,8 @@ export const PHRASES: Record<SpokenLanguage, Phrases> = {
     quick: [
       'Mohli byste trochu přiblížit, co přesně máte na mysli? Chci vám odpovědět přesně.',
       'Mohli byste otázku zopakovat? Chci se ujistit, že odpovím přesně na to, na co se ptáte.',
-      'To je dobrá otázka. Která část je pro vás nejdůležitější, abych odpověděl přesně?',
-      'Chci si být jistý, že vám správně rozumím. Mohli byste to říct jinak?',
+      'To je dobrá otázka. Která část je pro vás nejdůležitější? Chci odpovědět přesně.',
+      'Chci mít jistotu, že vám správně rozumím. Mohli byste to říct jinak?',
     ],
     technical: [
       'To je podrobná technická otázka. Raději to ověřím s naším vývojovým týmem a ozvu se vám s přesnou odpovědí.',
@@ -78,9 +78,9 @@ export const PHRASES: Record<SpokenLanguage, Phrases> = {
       'Děkuji, to nám vyhovuje. Zůstaňme v kontaktu ohledně dalších kroků.',
     ],
     clarifyPoint:
-      'Mohli byste upřesnit, který bod máte na mysli? Potřebuji trochu více kontextu, abych odpověděl přesně.',
+      'Mohli byste upřesnit, který bod máte na mysli? Potřebuji trochu více kontextu, aby byla moje odpověď přesná.',
     clarifyOption:
-      'Mohli byste upřesnit, kterou možnost máte na mysli? Potřebuji to vědět, abych odpověděl přesně.',
+      'Mohli byste upřesnit, kterou možnost máte na mysli? Potřebuji to vědět, aby byla moje odpověď přesná.',
     noVerifiedInfo:
       'K tomu nemám v poznámkách ověřené informace, takže zatím nemohu dát spolehlivou odpověď.',
   },
