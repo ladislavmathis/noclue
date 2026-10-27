@@ -27,14 +27,15 @@ export const ALL_FALLBACKS = [
  * The wording checks below match English phrases. In a fixed non-English meeting they would
  * misfire (an answer can never contain "proposed"), so they run only for English answers.
  * In automatic mode the answer itself decides: it counts as English when common English
- * function words make up a clear share of it.
+ * function words make up a clear share of it. The list leaves out words that are also common
+ * in Slovak or Czech ("a", "i", "to", "on", "by", "do"), which would tip those answers over.
  */
 export function englishWording(text: string, language: MeetingLanguage) {
   if (language === 'en') return true;
   if (language !== 'auto') return false;
   const words = text.toLowerCase().match(/\p{L}+/gu) ?? [];
   const english = words.filter((w) =>
-    /^(?:the|a|an|and|or|is|are|was|were|we|i|you|it|to|of|in|on|for|with|that|this|have|has|not|be|will|would|can|could)$/.test(
+    /^(?:the|an|and|or|is|are|was|were|we|you|it|of|in|for|with|from|at|but|as|that|this|have|has|does|did|not|be|will|would|can|could)$/.test(
       w,
     ),
   ).length;

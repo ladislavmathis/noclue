@@ -258,6 +258,18 @@ describe('English wording checks', () => {
     expect(englishWording('Pilot začneme v marci.', 'en')).toBe(true);
     expect(englishWording('We start the pilot in March.', 'sk')).toBe(false);
   });
+  it('does not count Slovak and Czech a, i, to as English', () => {
+    expect(englishWording('Chceme to spustiť v marci a potom to overiť.', 'auto')).toBe(false);
+    expect(englishWording('Chceme to spustit v březnu a pak to ověřit.', 'auto')).toBe(false);
+    expect(englishWording('To je on a ja, i keď to nie je isté.', 'auto')).toBe(false);
+    expect(englishWording('I think it is a good idea to start in March.', 'auto')).toBe(true);
+  });
+  it('leaves a Slovak answer alone in automatic mode', () => {
+    const text = 'Pilot je naplánovaný na marec a potom to vyhodnotíme.';
+    const answer = planned('auto', text);
+    expect(claimProblem(answer, project('auto'))).toBeUndefined();
+    expect(qualifyProposal(answer, project('auto')).suggestedResponse).toBe(text);
+  });
   it('still demands planned wording from an English answer', () => {
     const answer = planned('en', 'The pilot starts in March.');
     expect(claimProblem(answer, project('en'))).toBe('Missing proposed or planned qualification');
